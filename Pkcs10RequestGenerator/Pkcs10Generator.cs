@@ -39,7 +39,8 @@ public static class Pkcs10Generator
             new DerSet(
                 new DerSequence(
                     new DerInteger(01),
-                    new DerBmpString("Microsoft Base Smart Card Crypto Provider"))));
+                    new DerBmpString("Microsoft Base Smart Card Crypto Provider"),
+                    new DerBitString(0))));
         var subjectPubInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(publicKey);
         var certificateExtensions = new DerSequence(
             new DerObjectIdentifier("1.2.840.113549.1.9.14"),
