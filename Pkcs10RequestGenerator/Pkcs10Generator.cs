@@ -58,15 +58,15 @@ public static class Pkcs10Generator
 
         var request = new Pkcs10CertificationRequest(signatureAlg, x509Name, publicKey, attributes, privateKey);
         
-        await using var csrWriter = new StringWriter();
-        await using var keyWriter = new StringWriter();
-        using var pemCsrWriter = new PemWriter(csrWriter);
-        using var pemKeyWriter = new PemWriter(keyWriter);
-        pemCsrWriter.WriteObject(request);
-        await File.WriteAllTextAsync(csrName,csrWriter.ToString());
-        await pemCsrWriter.Writer.FlushAsync();
-        pemKeyWriter.WriteObject(keyPair);
-        await File.WriteAllTextAsync(keyName, keyWriter.ToString());
-        await pemKeyWriter.Writer.FlushAsync();
+        await CreatePemFile(csrName, request);
+        await CreatePemFile(keyName, keyPair);
+    }
+
+    private static async Task CreatePemFile(string fileName, object content)
+    {
+        await using var stringWriter = new StringWriter();
+        using var pemWriter = new PemWriter(stringWriter);
+        pemWriter.WriteObject(content);
+        await File.WriteAllTextAsync(fileName, stringWriter.ToString());
     }
 }
