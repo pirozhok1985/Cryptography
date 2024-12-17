@@ -26,7 +26,7 @@ public static class Pkcs10Generator
         
         var publicKey = keyPair.Public;
         var privateKey = keyPair.Private;
-        var osVersionAttr = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.13.2.3"),
+        var osVersion = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.13.2.3"),
             new DerSet(new DerIA5String(Environment.OSVersion.VersionString)));
         var clientInfo = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.21.20"),
             new DerSet(
@@ -53,7 +53,7 @@ public static class Pkcs10Generator
                         X509Extensions.KeyUsage,
                         DerBoolean.True,
                         new DerOctetString(new KeyUsage(KeyUsage.KeyEncipherment))))));
-        var attributes = new DerSet(osVersionAttr, clientInfo, enrollmentCsp, certificateExtensions);
+        var attributes = new DerSet(osVersion, clientInfo, enrollmentCsp, certificateExtensions);
         var signatureAlg = "SHA256WITHRSA";
 
         var request = new Pkcs10CertificationRequest(signatureAlg, x509Name, publicKey, attributes, privateKey);
