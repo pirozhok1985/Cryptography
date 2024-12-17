@@ -34,7 +34,7 @@ public static class Pkcs10Generator
                     new DerInteger(09),
                     new DerUtf8String(hostName),
                     new DerUtf8String($"SIGMA\\{userName}"),
-                    new DerUtf8String("certreq.exe"))));
+                    new DerUtf8String("Pkcs10RequestGenerator.exe"))));
         var enrollmentCsp = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.13.2.2"),
             new DerSet(
                 new DerSequence(
