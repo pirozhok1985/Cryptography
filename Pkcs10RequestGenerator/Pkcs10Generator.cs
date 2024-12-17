@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
@@ -6,6 +7,7 @@ using Org.BouncyCastle.Crypto.Prng;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Tls;
 using Org.BouncyCastle.X509;
 
 namespace Pkcs10;
@@ -51,7 +53,7 @@ public static class Pkcs10Generator
                         DerBoolean.True,
                         new DerOctetString(new KeyUsage(KeyUsage.KeyEncipherment))))));
         var attributes = new DerSet(osVersionAttr, clientInfo, enrollmentCsp, certificateExtensions);
-        var signatureAlg = "SHA1WITHRSA";
+        var signatureAlg = "SHA256WITHRSA";
 
         var request = new Pkcs10CertificationRequest(signatureAlg, x509Name, publicKey, attributes, privateKey);
         
@@ -60,7 +62,7 @@ public static class Pkcs10Generator
         using var pemCsrWriter = new PemWriter(csrWriter);
         using var pemKeyWriter = new PemWriter(keyWriter);
         pemCsrWriter.WriteObject(request);
-        await File.WriteAllTextAsync(csrName, csrWriter.ToString());
+        await File.WriteAllTextAsync(csrName,csrWriter.ToString());
         await pemCsrWriter.Writer.FlushAsync();
         pemKeyWriter.WriteObject(keyPair);
         await File.WriteAllTextAsync(keyName, keyWriter.ToString());

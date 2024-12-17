@@ -20,22 +20,22 @@ public static class Program
             IsRequired = true
         };
 
-        var csrNameOption = new Option<string>("--csr-name", description: "Csr file name")
+        var csrNameOption = new Option<string>("--out-csr", description: "Csr file name")
         {
             IsRequired = true
         };
         
-        var keyNameOption = new Option<string>("--key-name", description: "Key file name")
+        var keyNameOption = new Option<string>("--out-key", description: "Key file name")
         {
             IsRequired = true
         };
         
-        var hostNameOption = new Option<string>("--host-name", description: "Hostname")
+        var hostNameOption = new Option<string>("--hostname", description: "Hostname")
         {
             IsRequired = true
         };
         
-        var userNameOption = new Option<string>("--user-name", description: "Username")
+        var userNameOption = new Option<string>("--username", description: "Username")
         {
             IsRequired = true
         };
