@@ -27,7 +27,7 @@ public static class Pkcs10Generator
         var publicKey = keyPair.Public;
         var privateKey = keyPair.Private;
         var osVersionAttr = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.13.2.3"),
-            new DerSet(new DerIA5String("10.0.19045.2")));
+            new DerSet(new DerIA5String(Environment.OSVersion.VersionString)));
         var clientInfo = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.21.20"),
             new DerSet(
                 new DerSequence(
