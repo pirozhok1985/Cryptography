@@ -61,28 +61,32 @@ public static class Pkcs10RequestGenerator
                 new DerSequence(new DerObjectIdentifier("1.2.840.113549.1.7.2"), signedData)));
         var attributes = new DerSet(osVersionAttr, clientInfo, enrollmentCsp, certificateExtensions, attestationStatement);
         var signatureAlg = "SHA1WITHRSA";
-
         return new Pkcs10CertificationRequest(signatureAlg, x509Name, publicKey, attributes, privateKey);
     }
 
-    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, AsymmetricKeyParameter publicKey)
+    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, AsymmetricKeyParameter publicKey, byte[] tpmtPublicKey)
     {
         var subjectPubInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(publicKey);
         var ski = new SubjectKeyIdentifier(subjectPubInfo);
         var signerId = new SignerIdentifier(ski.ToAsn1Object());
         var signerInfoDgstAlg = new AlgorithmIdentifier(new DerObjectIdentifier("2.16.840.1.101.3.4.2.1"));
         var sigAlg = new AlgorithmIdentifier(PkcsObjectIdentifiers.RsaEncryption);
-        var signature = new DerOctetString(sigData);
+        var signature = new BerOctetString(sigData);
         var signedAttributes = new DerSet();
         var unsignedAttributes = new DerSet();
         var signerInfo = new SignerInfo(signerId, signerInfoDgstAlg, Asn1Set.GetInstance(signedAttributes), sigAlg, signature, Asn1Set.GetInstance(unsignedAttributes));
         
         var digestAlgId = new DerObjectIdentifier("2.16.840.1.101.3.4.2.1");
         return new SignedData(
-            new DerSet(digestAlgId),
-            new ContentInfo(new DerObjectIdentifier("1.2.840.113549.1.7.1"), new DerOctetString(attestationStatement)),
-            new DerSet(),
-            new DerSet(),
-            new DerSet(signerInfo));
+            new BerSet(digestAlgId),
+            new ContentInfo(
+                new DerObjectIdentifier("1.2.840.113549.1.7.1"),
+                new BerSequence(
+                    new BerOctetString(attestationStatement),
+                    new BerOctetString(tpmtPublicKey)
+                    )),
+            new BerSet(),
+            new BerSet(),
+            new BerSet(signerInfo));
     }
 }

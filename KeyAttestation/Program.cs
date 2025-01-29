@@ -36,8 +36,9 @@ var pubKey = (AsymmetricKeyParameter)pemReader.ReadObject();
 
 var sigData = File.ReadAllBytes("/home/sigma.sbrf.ru@18497320/temp/openssl_test/attestation_test.sign");
 var attestationStatement = File.ReadAllBytes("/home/sigma.sbrf.ru@18497320/temp/openssl_test/attestation_test");
+var clientPubKey = File.ReadAllBytes("/home/sigma.sbrf.ru@18497320/temp/openssl_test/test-key.pub");
 
-var cms = Pkcs10RequestGenerator.GenerateCms(sigData, attestationStatement, pubKey);
+var cms = Pkcs10RequestGenerator.GenerateCms(sigData, attestationStatement, pubKey, clientPubKey);
 var csr = Pkcs10RequestGenerator.Generate(cms);
 await using var csrWriter = new StringWriter();
 using var pemCsrWriter = new PemWriter(csrWriter);
