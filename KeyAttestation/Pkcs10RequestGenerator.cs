@@ -64,7 +64,7 @@ public static class Pkcs10RequestGenerator
         return new Pkcs10CertificationRequest(signatureAlg, x509Name, publicKey, attributes, privateKey);
     }
 
-    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, AsymmetricKeyParameter publicKey, byte[] tpmtPublicKey)
+    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, AsymmetricKeyParameter publicKey, byte[] akPublicKey)
     {
         var subjectPubInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(publicKey);
         var ski = new SubjectKeyIdentifier(subjectPubInfo);
@@ -83,7 +83,7 @@ public static class Pkcs10RequestGenerator
                 new DerObjectIdentifier("1.2.840.113549.1.7.1"),
                 new BerSequence(
                     new BerOctetString(attestationStatement),
-                    new BerOctetString(tpmtPublicKey)
+                    new BerOctetString(akPublicKey)
                     )),
             new BerSet(),
             new BerSet(),
