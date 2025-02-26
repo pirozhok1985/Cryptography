@@ -1,9 +1,11 @@
+using System.Security.Cryptography;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Crypto.Prng;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
@@ -75,6 +77,7 @@ public static class Pkcs10RequestGenerator
         var signedAttributes = new DerSet();
         var unsignedAttributes = new DerSet();
         var signerInfo = new SignerInfo(signerId, signerInfoDgstAlg, Asn1Set.GetInstance(signedAttributes), sigAlg, signature, Asn1Set.GetInstance(unsignedAttributes));
+        var publicKeyToEncode = RSA.Create(DotNetUtilities.ToRSAParameters((RsaKeyParameters)publicKey)).ExportRSAPublicKey();
         
         var digestAlgId = new DerObjectIdentifier("2.16.840.1.101.3.4.2.1");
         return new SignedData(
@@ -83,7 +86,8 @@ public static class Pkcs10RequestGenerator
                 new DerObjectIdentifier("1.2.840.113549.1.7.1"),
                 new BerSequence(
                     new BerOctetString(attestationStatement),
-                    new BerOctetString(tpmtPublicKey)
+                    new BerOctetString(tpmtPublicKey),
+                    new BerOctetString(publicKeyToEncode)
                     )),
             new BerSet(),
             new BerSet(),
