@@ -85,9 +85,9 @@ public static class Pkcs10RequestGenerator
             new ContentInfo(
                 new DerObjectIdentifier("1.2.840.113549.1.7.1"),
                 new BerSequence(
-                    new BerOctetString(attestationStatement),
-                    new BerOctetString(tpmtPublicKey),
-                    new BerOctetString(publicKeyToEncode)
+                    new BerSequence(new DerObjectIdentifier("2.23.133.2.18"), new BerOctetString(attestationStatement)), // tcg-at-tpmSecurityAssertions
+                    new BerSequence(new DerObjectIdentifier("2.23.133.8.12"), new BerOctetString(tpmtPublicKey)), // tcg-at-tpmSecurityTarget
+                    new BerSequence(new DerObjectIdentifier("2.23.133.8.3"), new BerOctetString(publicKeyToEncode)) // tcg-kp-AIKCertificate
                     )),
             new BerSet(),
             new BerSet(),
