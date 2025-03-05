@@ -15,7 +15,7 @@ public class Helpers
     public void ShouldReturnValidHexString(uint value, string pattern)
     {
         // Act
-        var result = KeyAttestation.Helpers.ToHexString(value);
+        var result = KeyAttestation.Utils.Helpers.ToHexString(value);
         
         // Assert
         Assert.NotEmpty(result);
@@ -37,7 +37,7 @@ public class Helpers
         
         // Act
         var csr = (Pkcs10CertificationRequest)pemReader.ReadObject();
-        await KeyAttestation.Helpers.WriteCsrAsync(csr, fileName, fileSystemMock.File);
+        await KeyAttestation.Utils.Helpers.WriteCsrAsync(csr, fileName, fileSystemMock.File);
         
         // Assert
         Assert.True(fileSystemMock.FileExists(fileName));

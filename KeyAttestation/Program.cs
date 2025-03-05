@@ -1,29 +1,16 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.IO.Abstractions;
-using KeyAttestation;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Parameters;
-using Tpm2Lib;
+using KeyAttestation.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-using var tpmFacade = new TpmFacade();
-tpmFacade.InitialiseTpm("/dev/tpmrm0");
-var ek = tpmFacade.CreateEk();
-var ak = tpmFacade.CreateAk(ek.Handle!);
-var srkHandlePersistent = TpmHandle.Persistent(5);
-var key = tpmFacade.CreateKey(srkHandlePersistent);
-var attestation = tpmFacade.Tpm!.Certify(key.Handle, ak.Handle, null, new SchemeRsassa(TpmAlgId.Sha256),
-    out var signature);
+var hostBuilder = Host.CreateApplicationBuilder();
 
-var rawRsa = new RawRsaCustom();
-rawRsa.Init(key.Public!, key.Private!);
+hostBuilder.Services.AddSingleton<IFileSystem, FileSystem>();
+hostBuilder.Services.AddScoped<IKeyAttestationService, KeyAttestationService>();
+hostBuilder.Services.AddHttpClient<KeyAttestationService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8080");
+});
 
-var keyPair = new AsymmetricCipherKeyPair(
-    new RsaKeyParameters(false, rawRsa.N.ToBigIntegerBc(), rawRsa.E.ToBigIntegerBc()),
-    new RsaKeyParameters(true, rawRsa.N.ToBigIntegerBc(), rawRsa.D.ToBigIntegerBc()));
-
-var cms = Pkcs10RequestGenerator.GenerateCms(((SignatureRsassa)signature).sig, attestation.GetTpmRepresentation(), keyPair.Public, ak.Public);
-var csr = Pkcs10RequestGenerator.Generate(keyPair.Public, keyPair.Private, cms);
-
-var fileWriter = new FileSystem().File;
-await Helpers.WriteCsrAsync(csr, "/home/sigma.sbrf.ru@18497320/temp/openssl_test/client.csr", fileWriter);
