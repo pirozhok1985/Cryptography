@@ -1,6 +1,6 @@
 using Org.BouncyCastle.Pkcs;
 
-namespace KeyAttestation.Services;
+namespace KeyAttestation.Client.Services;
 
 public interface IKeyAttestationService
 {

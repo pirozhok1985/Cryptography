@@ -3,7 +3,7 @@ using System.Numerics;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 
-namespace KeyAttestation.Utils;
+namespace KeyAttestation.Client.Utils;
 
 public static class Helpers
 {

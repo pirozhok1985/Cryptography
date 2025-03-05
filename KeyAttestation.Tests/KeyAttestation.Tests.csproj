@@ -23,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\KeyAttestation\KeyAttestation.csproj" />
+      <ProjectReference Include="..\KeyAttestation.Client\KeyAttestation.Client.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 using Tpm2Lib;
 
-namespace KeyAttestation.Entities;
+namespace KeyAttestation.Client.Entities;
 
 public class TpmKey(TpmPublic? pub, TpmHandle? handle, TpmPrivate? priv = null)
 {

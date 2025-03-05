@@ -12,7 +12,7 @@ using ContentInfo = Org.BouncyCastle.Asn1.Cms.ContentInfo;
 using SignedData = Org.BouncyCastle.Asn1.Cms.SignedData;
 using SignerInfo = Org.BouncyCastle.Asn1.Cms.SignerInfo;
 
-namespace KeyAttestation.Utils;
+namespace KeyAttestation.Client.Utils;
 
 public static class Pkcs10RequestGenerator
 {

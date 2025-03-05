@@ -1,13 +1,13 @@
 using System.IO.Abstractions;
-using KeyAttestation.Entities;
-using KeyAttestation.Utils;
+using KeyAttestation.Client.Entities;
+using KeyAttestation.Client.Utils;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Pkcs;
 using Tpm2Lib;
 
-namespace KeyAttestation.Services;
+namespace KeyAttestation.Client.Services;
 
 public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
 {

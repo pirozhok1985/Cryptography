@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace KeyAttestation.Utils;
+namespace KeyAttestation.Client.Utils;
 
 public class Native
 {
