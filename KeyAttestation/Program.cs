@@ -12,8 +12,7 @@ var ek = tpmFacade.CreateEk();
 var ak = tpmFacade.CreateAk(ek.Handle!);
 var srkHandlePersistent = TpmHandle.Persistent(5);
 var key = tpmFacade.CreateKey(srkHandlePersistent);
-var clientKeyHandle = tpmFacade.Tpm!.Load(srkHandlePersistent, key.Private, key.Public);
-var attestation = tpmFacade.Tpm!.Certify(clientKeyHandle, ak.Handle, null, new SchemeRsassa(TpmAlgId.Sha256),
+var attestation = tpmFacade.Tpm!.Certify(key.Handle, ak.Handle, null, new SchemeRsassa(TpmAlgId.Sha256),
     out var signature);
 
 var rawRsa = new RawRsaCustom();
