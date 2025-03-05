@@ -1,5 +1,8 @@
+using System.IO.Abstractions;
 using System.Numerics;
 using System.Text;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Pkcs;
 
 namespace KeyAttestation;
 
@@ -53,4 +56,16 @@ public static class Helpers
 
     public static Org.BouncyCastle.Math.BigInteger ToBigIntegerBc(this BigInteger bigInteger)
         => new (bigInteger.ToString());
+
+    public static async Task WriteCsrAsync(
+        Pkcs10CertificationRequest request,
+        string fileName,
+        IFile fileWriter,
+        CancellationToken cancellationToken = default)
+    {
+        await using var textWriter = new StringWriter();
+        using var pemWriter = new PemWriter(textWriter);
+        pemWriter.WriteObject(request);
+        await fileWriter.WriteAllTextAsync(fileName, pemWriter.Writer.ToString(), cancellationToken);
+    }
 }

@@ -1,9 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.IO.Abstractions;
 using KeyAttestation;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.OpenSsl;
 using Tpm2Lib;
 
 using var tpmFacade = new TpmFacade();
@@ -25,7 +25,6 @@ var keyPair = new AsymmetricCipherKeyPair(
 
 var cms = Pkcs10RequestGenerator.GenerateCms(((SignatureRsassa)signature).sig, attestation.GetTpmRepresentation(), keyPair.Public, ak.Public);
 var csr = Pkcs10RequestGenerator.Generate(keyPair.Public, keyPair.Private, cms);
-await using var textWriter = new StringWriter();
-using var pemWriter = new PemWriter(textWriter);
-pemWriter.WriteObject(csr);
-await File.WriteAllTextAsync("/home/sigma.sbrf.ru@18497320/temp/openssl_test/client.csr", pemWriter.Writer.ToString());
+
+var fileWriter = new FileSystem().File;
+await Helpers.WriteCsrAsync(csr, "/home/sigma.sbrf.ru@18497320/temp/openssl_test/client.csr", fileWriter);
