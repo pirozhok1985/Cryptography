@@ -3,7 +3,7 @@ using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using Shouldly;
 
-namespace Cryptography.Tests;
+namespace KeyAttestation.Tests;
 
 public class Helpers
 {
