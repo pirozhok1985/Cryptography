@@ -1,4 +1,6 @@
+using System.Reflection;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.Pkcs;
@@ -7,9 +9,11 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Crypto.Prng;
+using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
+using Tpm2Lib;
 using ContentInfo = Org.BouncyCastle.Asn1.Cms.ContentInfo;
 using SignedData = Org.BouncyCastle.Asn1.Cms.SignedData;
 using SignerInfo = Org.BouncyCastle.Asn1.Cms.SignerInfo;
@@ -18,19 +22,10 @@ namespace KeyAttestation;
 
 public static class Pkcs10RequestGenerator
 {
-    public static Pkcs10CertificationRequest Generate(SignedData signedData)
+    public static Pkcs10CertificationRequest Generate(AsymmetricKeyParameter publicKey, AsymmetricKeyParameter privateKey,  SignedData signedData)
     {
-        var keyRandomGenerator = new CryptoApiRandomGenerator();
-        var keyPairGenerator = new RsaKeyPairGenerator();
-        var keyGenerationParameters = new KeyGenerationParameters(new SecureRandom(keyRandomGenerator), 2048);
-        keyPairGenerator.Init(keyGenerationParameters);
-        var keyPair = keyPairGenerator.GenerateKeyPair();
-
         var x509Name =
             new X509Name("CN=18497320,OU=Users,OU=LinuxUser,E=eeanisimov@sberbank.ru,DC=sigma,DC=sbrf,DC=ru");
-
-        var publicKey = keyPair.Public;
-        var privateKey = keyPair.Private;
         var osVersionAttr = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.13.2.3"),
             new DerSet(new DerIA5String("10.0.19045.2")));
         var clientInfo = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.21.20"),
@@ -85,11 +80,10 @@ public static class Pkcs10RequestGenerator
             new ContentInfo(
                 new DerObjectIdentifier("1.2.840.113549.1.7.1"),
                 new BerSequence(
-                    new BerSequence(new DerObjectIdentifier("2.23.133.2.18"), new BerOctetString(attestationStatement)), // tcg-at-tpmSecurityAssertions
-                    new BerSequence(new DerObjectIdentifier("2.23.133.8.3"), new BerOctetString(aikPublicKey)), // tcg-kp-AIKCertificate
-                    new BerSequence(new DerObjectIdentifier("2.23.133.8.12"), new BerOctetString(publicKeyToEncode)) // tcg-at-tpmSecurityTarget
-                    )),
-            new BerSet(),
+                    new BerOctetString(attestationStatement))),
+            new BerSet(                    
+                new BerSequence(new DerObjectIdentifier("2.23.133.8.3"), new BerOctetString(aikPublicKey)), // tcg-kp-AIKCertificate
+                new BerSequence(new DerObjectIdentifier("2.23.133.8.12"), new BerOctetString(publicKeyToEncode))), // tcg-at-tpmSecurityTarget),
             new BerSet(),
             new BerSet(signerInfo));
     }
