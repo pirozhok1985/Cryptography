@@ -55,9 +55,9 @@ public static class Pkcs10RequestGenerator
         return new Pkcs10CertificationRequest(signatureAlg, x509Name, publicKey, attributes, privateKey);
     }
 
-    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, AsymmetricKeyParameter publicKey, byte[] aikPublicKey)
+    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, byte[] publicKey, AsymmetricKeyParameter aikPublicKey)
     {
-        var subjectPubInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(publicKey);
+        var subjectPubInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(aikPublicKey);
         var ski = new SubjectKeyIdentifier(subjectPubInfo);
         var signerId = new SignerIdentifier(ski.ToAsn1Object());
         var signerInfoDgstAlg = new AlgorithmIdentifier(new DerObjectIdentifier("2.16.840.1.101.3.4.2.1"));
@@ -66,7 +66,7 @@ public static class Pkcs10RequestGenerator
         var signedAttributes = new DerSet();
         var unsignedAttributes = new DerSet();
         var signerInfo = new SignerInfo(signerId, signerInfoDgstAlg, Asn1Set.GetInstance(signedAttributes), sigAlg, signature, Asn1Set.GetInstance(unsignedAttributes));
-        var publicKeyToEncode = RSA.Create(DotNetUtilities.ToRSAParameters((RsaKeyParameters)publicKey)).ExportRSAPublicKey();
+        var publicKeyToEncode = RSA.Create(DotNetUtilities.ToRSAParameters((RsaKeyParameters)aikPublicKey)).ExportRSAPublicKey();
         
         var digestAlgId = new DerObjectIdentifier("2.16.840.1.101.3.4.2.1");
         return new SignedData(
@@ -76,7 +76,7 @@ public static class Pkcs10RequestGenerator
                 new BerSequence(
                     new BerOctetString(attestationStatement))),
             new BerSet(                    
-                new BerSequence(new DerObjectIdentifier("2.23.133.8.3"), new BerOctetString(aikPublicKey)), // tcg-kp-AIKCertificate
+                new BerSequence(new DerObjectIdentifier("2.23.133.8.3"), new BerOctetString(publicKey)), // tcg-kp-AIKCertificate
                 new BerSequence(new DerObjectIdentifier("2.23.133.8.12"), new BerOctetString(publicKeyToEncode))), // tcg-at-tpmSecurityTarget),
             new BerSet(),
             new BerSet(signerInfo));

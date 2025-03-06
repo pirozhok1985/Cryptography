@@ -29,21 +29,20 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
     public async Task<string> GeneratePkcs10CertificationRequestAsync(bool saveAsPemEncodedFile, string? fileName = null, CancellationToken cancellationToken = default)
     {
         var ek = _tpmFacade!.CreateEk();
-        var ak = _tpmFacade.CreateAk(ek.Handle!);
+        var aik = _tpmFacade.CreateAk(ek.Handle!);
         var srkHandlePersistent = TpmHandle.Persistent(5);
-        var key = _tpmFacade.CreateKey(srkHandlePersistent);
-        var attestation = _tpmFacade.Tpm!.Certify(key.Handle, ak.Handle, null, new SchemeRsassa(TpmAlgId.Sha256),
+        var clientTpmKey = _tpmFacade.CreateKey(srkHandlePersistent);
+        var attestation = _tpmFacade.Tpm!.Certify(clientTpmKey.Handle, aik.Handle, null, new SchemeRsassa(TpmAlgId.Sha256),
             out var signature);
 
-        var rawRsa = new RawRsaCustom();
-        rawRsa.Init(key.Public!, key.Private!);
+        var clientRsaKeyPair = new AsymmetricCipherKeyPair(
+            Helpers.ToAsymmetricKeyParameter(clientTpmKey, false),
+            Helpers.ToAsymmetricKeyParameter(clientTpmKey, true));
 
-        var keyPair = new AsymmetricCipherKeyPair(
-            new RsaKeyParameters(false, rawRsa.N.ToBigIntegerBc(), rawRsa.E.ToBigIntegerBc()),
-            new RsaKeyParameters(true, rawRsa.N.ToBigIntegerBc(), rawRsa.D.ToBigIntegerBc()));
+        var aikRsaPublic = Helpers.ToAsymmetricKeyParameter(aik, false);
 
-        var cms = Pkcs10RequestGenerator.GenerateCms(((SignatureRsassa)signature).sig, attestation.GetTpmRepresentation(), keyPair.Public, ak.Public);
-        var csr = Pkcs10RequestGenerator.Generate(keyPair.Public, keyPair.Private, cms);
+        var cms = Pkcs10RequestGenerator.GenerateCms(((SignatureRsassa)signature).sig, attestation.GetTpmRepresentation(), clientTpmKey.Public!.GetTpmRepresentation(), aikRsaPublic);
+        var csr = Pkcs10RequestGenerator.Generate(clientRsaKeyPair.Public, clientRsaKeyPair.Private, cms);
 
         if (saveAsPemEncodedFile)
         {

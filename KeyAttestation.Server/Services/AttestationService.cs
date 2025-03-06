@@ -27,16 +27,7 @@ public class AttestationService : IAttestationService
             });
         }
 
-        var info = certificationRequest.GetCertificationRequestInfo();
-        var attestationStatement = (SignedData)info.Attributes
-            .First(x => x.GetType() == typeof(DerSequence) 
-                        && ((DerSequence)x).Parser.ReadObject() is SignedData);
-
-        var content = attestationStatement.EncapContentInfo.Content as BerSequence;
-        var attestBerOctetString = content!.Parser.ReadObject() as BerOctetString;
-        var attestBytes = attestBerOctetString!.GetOctets();
-        var result = AsnDecoder.ReadOctetString(attestBytes.AsSpan(), AsnEncodingRules.BER, out _);
-        var attest = Marshaller.FromTpmRepresentation<Attest>(result);
+        var attestationRequest = Helpers.GetAttestationRequest(certificationRequest, _logger);
 
         return Task.FromResult(new AttestationResult());
     }

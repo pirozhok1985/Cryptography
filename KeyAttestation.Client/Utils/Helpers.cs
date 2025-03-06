@@ -1,5 +1,8 @@
 using System.IO.Abstractions;
 using System.Numerics;
+using KeyAttestation.Client.Entities;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 
@@ -73,5 +76,14 @@ public static class Helpers
         using var pemWriter = new PemWriter(textWriter);
         pemWriter.WriteObject(request);
         return textWriter.ToString();
+    }
+
+    public static AsymmetricKeyParameter ToAsymmetricKeyParameter(TpmKey key, bool isPrivate)
+    {
+        var rawRsa = new RawRsaCustom();
+        rawRsa.Init(key.Public!, key.Private!);
+        return isPrivate
+            ? new RsaKeyParameters(true, rawRsa.N.ToBigIntegerBc(), rawRsa.D.ToBigIntegerBc())
+            : new RsaKeyParameters(false, rawRsa.N.ToBigIntegerBc(), rawRsa.E.ToBigIntegerBc());
     }
 }
