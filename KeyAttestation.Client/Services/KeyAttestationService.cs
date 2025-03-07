@@ -1,23 +1,23 @@
 using System.IO.Abstractions;
+using Google.Protobuf;
 using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Utils;
+using KeyAttestationV1;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Pkcs;
 using Tpm2Lib;
 
 namespace KeyAttestation.Client.Services;
 
 public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
 {
-    private readonly HttpClient _client;
+    private readonly KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient _client;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger<KeyAttestationService> _logger;
     private readonly TpmFacade? _tpmFacade;
     private bool _disposed;
 
-    public KeyAttestationService(IFileSystem fileSystem, ILogger<KeyAttestationService> logger, HttpClient client)
+    public KeyAttestationService(IFileSystem fileSystem, ILogger<KeyAttestationService> logger, KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient client)
     {
         _fileSystem = fileSystem;
         _logger = logger;
@@ -26,7 +26,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         _tpmFacade.InitialiseTpm("/dev/tpmrm0");
     }
     
-    public async Task<string> GeneratePkcs10CertificationRequestAsync(bool saveAsPemEncodedFile, string? fileName = null, CancellationToken cancellationToken = default)
+    public async Task<(string Csr, byte[] EkPub)> GeneratePkcs10CertificationRequestAsync(bool saveAsPemEncodedFile, string? fileName = null, CancellationToken cancellationToken = default)
     {
         var ek = _tpmFacade!.CreateEk();
         var aik = _tpmFacade.CreateAk(ek.Handle!);
@@ -49,24 +49,36 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
             await Helpers.WriteCsrAsync(csr, fileName, _fileSystem.File, cancellationToken);
         }
 
-        return await Helpers.ConvertPkcs10RequestToPem(csr);
+        return (await Helpers.ConvertPkcs10RequestToPem(csr), Marshaller.GetTpmRepresentation(ek.Public));
     }
 
-    public async Task<string> SendPkcs10CertificationRequestAsync(string certificationRequest,
+    public async Task<AttestationResult> SendPkcs10CertificationRequestAsync(
+        string certificationRequest,
+        byte[] ekPub,
         CancellationToken cancellationToken)
     {
-        var content = new StringContent(certificationRequest);
-        var response = await _client.PostAsync("csr", content, cancellationToken);
-        try
+        var activationRequest = new ActivationRequest
         {
-            response.EnsureSuccessStatusCode();
-        }
-        catch (Exception e)
+            Csr = certificationRequest,
+            EkPub = ByteString.CopyFrom(ekPub)
+        };
+        var activationResponse = await _client.ActivateCredentialsAsync(activationRequest);
+        
+        //TODO
+        //Some service which makes credential activation
+        
+        var attestationRequest = new AttestationRequest
         {
-            _logger.LogError("Error sending csr! Error: {Error}", e.Message);
-            return string.Empty;
-        }
-        return await response.Content.ReadAsStringAsync(cancellationToken);
+            DecryptedCredentials = null,
+            CorrelationId = 0
+        };
+         var attestationResponse = await _client.AttestAsync(attestationRequest);
+         return new AttestationResult
+         {
+             Result = attestationResponse.IsAttested,
+             Message = attestationResponse.Message,
+             Certificate = attestationResponse.Certificate
+         };
     }
 
     public void Dispose()

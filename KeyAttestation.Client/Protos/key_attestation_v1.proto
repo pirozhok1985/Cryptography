@@ -4,14 +4,26 @@ package key_attestation_v1;
 
 service KeyAttestationService {
   rpc Attest (AttestationRequest) returns (AttestationResponse);
+  rpc ActivateCredentials(ActivationRequest) returns (ActivationResponse);
 }
 
 message AttestationRequest {
-  string csr = 1;
+  bytes decrypted_credentials = 1;
+  int32 correlation_id = 2; 
 }
 
 message AttestationResponse {
   bool is_attested = 1;
   string message = 2;
   string certificate = 3;
+}
+
+message ActivationRequest {
+  string csr = 1;
+  bytes ek_pub = 2;
+}
+
+message ActivationResponse {
+  bytes encrypted_credentials = 1;
+  int32 correlation_id = 2;
 }
