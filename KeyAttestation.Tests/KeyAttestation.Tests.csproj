@@ -24,6 +24,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\KeyAttestation.Client\KeyAttestation.Client.csproj" />
+      <ProjectReference Include="..\KeyAttestation.Server\KeyAttestation.Server.csproj" />
     </ItemGroup>
 
 </Project>

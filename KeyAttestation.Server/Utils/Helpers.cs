@@ -1,8 +1,6 @@
-using System.Formats.Asn1;
 using KeyAttestation.Server.Entities;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
-using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using Tpm2Lib;
@@ -28,30 +26,37 @@ public static class Helpers
 
     public static AttestationRequest GetAttestationRequest(Pkcs10CertificationRequest request, ILogger logger)
     {
-        var info = request.GetCertificationRequestInfo();
-        var attestationStatement = (SignedData)info.Attributes
-            .First(x => x.GetType() == typeof(DerSequence) 
-                        && ((DerSequence)x).Parser.ReadObject() is SignedData);
-        
+        var attestationStatement = GetSignedData(request);
         var attest = GetAttestData(attestationStatement);
         var signature = GetAttestSignature(attestationStatement);
         var keys = GetSignedDataKeys(attestationStatement);
         return new AttestationRequest(attest, signature, keys.Aik, keys.Client);
     }
 
+    private static SignedData GetSignedData(Pkcs10CertificationRequest request)
+    {
+        var info = request.GetCertificationRequestInfo();
+        var attributes = (DerSet)info.Attributes;
+        var attestationStatementSequence = (DerSequence)attributes.First(attribute => attribute is DerSequence sequence
+            && ((DerObjectIdentifier)sequence[0]).Id == "1.3.6.1.4.1.311.21.24");
+        var signedDataSequence = ((DerSequence)((DerSet)attestationStatementSequence.First(
+                    x => x is DerSet))
+                .First(x => x is DerSequence))
+            .First(x => x is DerSequence);
+        return SignedData.GetInstance(signedDataSequence);
+    }
+
     private static Attest GetAttestData(SignedData signedData)
     {
-        var content = signedData.EncapContentInfo.Content as BerSequence;
-        var attestBerOctetString = content!.Parser.ReadObject() as BerOctetString;
-        var attestBytes = attestBerOctetString!.GetOctets();
-        var result = AsnDecoder.ReadOctetString(attestBytes.AsSpan(), AsnEncodingRules.BER, out _);
-        return Marshaller.FromTpmRepresentation<Attest>(result);
+        var content = signedData.EncapContentInfo.Content as DerOctetString;
+        var attestBytes = content!.GetOctets();
+        return Marshaller.FromTpmRepresentation<Attest>(attestBytes);
     }
 
     private static byte[] GetAttestSignature(SignedData signedData)
     {
-        var signerInfosBerSet = signedData.SignerInfos as BerSet;
-        var signerInfos = signerInfosBerSet!.Parser.ReadObject() as SignerInfo;
+        var signerInfosDerSet = signedData.SignerInfos as DerSet;
+        var signerInfos = SignerInfo.GetInstance(signerInfosDerSet![0]);
         return signerInfos!.EncryptedDigest.GetOctets();
     }
 
@@ -59,24 +64,24 @@ public static class Helpers
     {
         byte[]? aikRsaPublicKey = null;
         TpmPublic? clientTpmPublicKey = null;
-        var certsBerSet = signedData.Certificates as BerSet;
-        var certsSequence = certsBerSet!.Parser.ReadObject() as BerSequence;
-        for (int i = 0; i < certsSequence!.Count; i++)
+        var certsSet = signedData.Certificates as DerSet;
+        foreach (var sequence in certsSet!)
         {
-            if (certsSequence[i] is DerObjectIdentifier objectIdentifier)
+            if (((DerSequence)sequence)[0] is DerObjectIdentifier id)
             {
-                switch (objectIdentifier.Id)
+                switch (id.Id)
                 {
                     case "2.23.133.8.3":
-                        aikRsaPublicKey = (certsSequence[i + 1] as BerOctetString)!.GetOctets();
+                        aikRsaPublicKey = (((DerSequence)sequence)[1] as DerOctetString)!.GetOctets();
                         break;
                     case "2.23.133.8.12":
-                        clientTpmPublicKey = Marshaller.FromTpmRepresentation<TpmPublic>((certsSequence[i + 1] as BerOctetString)!.GetOctets());
+                        clientTpmPublicKey =
+                            Marshaller.FromTpmRepresentation<TpmPublic>((((DerSequence)sequence)[1] as DerOctetString)!.GetOctets());
                         break;
                 }
             }
         }
-
+        
         return (aikRsaPublicKey, clientTpmPublicKey)!;
     }
 }

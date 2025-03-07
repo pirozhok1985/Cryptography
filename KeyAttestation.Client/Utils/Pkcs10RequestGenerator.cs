@@ -70,15 +70,14 @@ public static class Pkcs10RequestGenerator
         
         var digestAlgId = new DerObjectIdentifier("2.16.840.1.101.3.4.2.1");
         return new SignedData(
-            new BerSet(digestAlgId),
+            new DerSet(digestAlgId),
             new ContentInfo(
                 new DerObjectIdentifier("1.2.840.113549.1.7.1"),
-                new BerSequence(
-                    new BerOctetString(attestationStatement))),
-            new BerSet(                    
-                new BerSequence(new DerObjectIdentifier("2.23.133.8.3"), new BerOctetString(publicKey)), // tcg-kp-AIKCertificate
-                new BerSequence(new DerObjectIdentifier("2.23.133.8.12"), new BerOctetString(publicKeyToEncode))), // tcg-at-tpmSecurityTarget),
-            new BerSet(),
-            new BerSet(signerInfo));
+                    new DerOctetString(attestationStatement)),
+            new DerSet(                    
+                new DerSequence(new DerObjectIdentifier("2.23.133.8.12"), new DerOctetString(publicKey)), // tcg-at-tpmSecurityTarget
+                new DerSequence(new DerObjectIdentifier("2.23.133.8.3"), new DerOctetString(publicKeyToEncode))), // tcg-kp-AIKCertificate,
+            new DerSet(),
+            new DerSet(signerInfo));
     }
 }

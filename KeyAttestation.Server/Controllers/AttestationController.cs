@@ -7,9 +7,9 @@ namespace KeyAttestation.Server.Controllers;
 public class AttestationController : ControllerBase
 {
     [HttpPost("/csr")]
-    public async Task<ActionResult<AttestationResult>> ValidateCertificationRequest(string request, IAttestationService attestationService)
+    public async Task<ActionResult<AttestationResult>> ValidateCertificationRequest(string request, IKeyAttestationService keyAttestationService)
     {
-       var attestationResult = await attestationService.AttestAsync(request);
+       var attestationResult = await keyAttestationService.AttestAsync(request);
        if (attestationResult.Result)
        {
            return Ok(attestationResult);

@@ -7,14 +7,14 @@ public class AttestationRequest
 {
     public Attest? Attestation { get; init; }
     public byte[]? Signature { get; init; }
-    public byte[]? AikTpmPublic { get; init; }
+    public byte[]? AikRsaPublic { get; init; }
     public TpmPublic? ClientTpmPublic { get; init; }
 
-    public AttestationRequest(Attest? attestation, byte[] signature, byte[] aikTpmPublic, TpmPublic? clientTpmPublic)
+    public AttestationRequest(Attest? attestation, byte[] signature, byte[] aikRsaPublic, TpmPublic? clientTpmPublic)
     {
         Attestation = attestation;
         Signature = signature;
-        AikTpmPublic = aikTpmPublic;
+        AikRsaPublic = aikRsaPublic;
         ClientTpmPublic = clientTpmPublic;
     }
 }
