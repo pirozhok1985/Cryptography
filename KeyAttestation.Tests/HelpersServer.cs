@@ -1,5 +1,3 @@
-
-
 using KeyAttestation.Server.Entities;
 using KeyAttestation.Server.Utils;
 using Microsoft.Extensions.Logging;
@@ -26,7 +24,7 @@ public class HelpersServer
         var attestationRequest = Helpers.GetAttestationRequest(pkcs10Request, logger);
         
         // Arrange
-        Assert.IsType<AttestationRequest>(attestationRequest);
+        Assert.IsType<AttestationData>(attestationRequest);
         Assert.NotNull(attestationRequest.Attestation);
         Assert.NotNull(attestationRequest.Signature);
         Assert.NotNull(attestationRequest.AikRsaPublic);

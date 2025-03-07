@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package key_attestation_v1;
+
+service KeyAttestationService {
+  rpc Attest (AttestationRequest) returns (AttestationResponse);
+}
+
+message AttestationRequest {
+  string csr = 1;
+}
+
+message AttestationResponse {
+  bool is_attested = 1;
+  string message = 2;
+  string certificate = 3;
+}

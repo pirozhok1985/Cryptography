@@ -10,12 +10,17 @@
 
     <ItemGroup>
       <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.0" />
+      <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.2" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.2" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.2" />
       <PackageReference Include="Microsoft.TSS" Version="2.1.1" />
       <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="22.0.11" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <Protobuf Include="Protos/key_attestation_v1.proto" GrpcServices="Client" />
     </ItemGroup>
 
 </Project>

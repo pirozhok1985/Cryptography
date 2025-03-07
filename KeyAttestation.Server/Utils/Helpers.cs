@@ -24,13 +24,13 @@ public static class Helpers
         }
     }
 
-    public static AttestationRequest GetAttestationRequest(Pkcs10CertificationRequest request, ILogger logger)
+    public static AttestationData GetAttestationRequest(Pkcs10CertificationRequest request, ILogger logger)
     {
         var attestationStatement = GetSignedData(request);
         var attest = GetAttestData(attestationStatement);
         var signature = GetAttestSignature(attestationStatement);
         var keys = GetSignedDataKeys(attestationStatement);
-        return new AttestationRequest(attest, signature, keys.Aik, keys.Client);
+        return new AttestationData(attest, signature, keys.Aik, keys.Client);
     }
 
     private static SignedData GetSignedData(Pkcs10CertificationRequest request)
