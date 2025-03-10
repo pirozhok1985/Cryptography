@@ -1,5 +1,6 @@
 using KeyAttestation.Server.Entities;
 using KeyAttestation.Server.Utils;
+using Tpm2Lib;
 
 namespace KeyAttestation.Server.Services;
 
@@ -24,8 +25,11 @@ public class KeyAttestationService : IKeyAttestationService
         return Task.FromResult(attestationRequest);
     }
 
-    public Task<TpmCredentials> MakeCredentials(AttestationData data, CancellationToken cancellationToken = default)
+    public Task<byte[]> MakeCredentialsAsync(AttestationData data, byte[] ekPub, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var ekTpmPub = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
+        var secret = Environment.MachineName.Select(Convert.ToByte).ToArray();
+        var idObject = ekTpmPub.CreateActivationCredentials(secret, data.AikTpmPublic!.GetName(), out _);
+        return Task.FromResult(Marshaller.GetTpmRepresentation(idObject));
     }
 }

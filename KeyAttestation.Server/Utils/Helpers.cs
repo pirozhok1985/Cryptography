@@ -60,9 +60,9 @@ public static class Helpers
         return signerInfos!.EncryptedDigest.GetOctets();
     }
 
-    private static (byte[] Aik, TpmPublic Client) GetSignedDataKeys(SignedData signedData)
+    private static (TpmPublic Aik, TpmPublic Client) GetSignedDataKeys(SignedData signedData)
     {
-        byte[]? aikRsaPublicKey = null;
+        TpmPublic aikTpmPublicKey = null;
         TpmPublic? clientTpmPublicKey = null;
         var certsSet = signedData.Certificates as DerSet;
         foreach (var sequence in certsSet!)
@@ -72,7 +72,7 @@ public static class Helpers
                 switch (id.Id)
                 {
                     case "2.23.133.8.3":
-                        aikRsaPublicKey = (((DerSequence)sequence)[1] as DerOctetString)!.GetOctets();
+                        aikTpmPublicKey = Marshaller.FromTpmRepresentation<TpmPublic>((((DerSequence)sequence)[1] as DerOctetString)!.GetOctets());
                         break;
                     case "2.23.133.8.12":
                         clientTpmPublicKey =
@@ -82,6 +82,6 @@ public static class Helpers
             }
         }
         
-        return (aikRsaPublicKey, clientTpmPublicKey)!;
+        return (aikTpmPublicKey, clientTpmPublicKey)!;
     }
 }

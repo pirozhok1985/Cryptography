@@ -7,14 +7,14 @@ public class AttestationData
 {
     public Attest? Attestation { get; init; }
     public byte[]? Signature { get; init; }
-    public byte[]? AikRsaPublic { get; init; }
+    public TpmPublic? AikTpmPublic { get; init; }
     public TpmPublic? ClientTpmPublic { get; init; }
 
-    public AttestationData(Attest? attestation, byte[] signature, byte[] aikRsaPublic, TpmPublic? clientTpmPublic)
+    public AttestationData(Attest? attestation, byte[] signature, TpmPublic? aikTpmPublic, TpmPublic? clientTpmPublic)
     {
         Attestation = attestation;
         Signature = signature;
-        AikRsaPublic = aikRsaPublic;
+        AikTpmPublic = aikTpmPublic;
         ClientTpmPublic = clientTpmPublic;
     }
 

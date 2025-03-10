@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using KeyAttestation.Client.Entities;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.Pkcs;
@@ -55,8 +56,9 @@ public static class Pkcs10RequestGenerator
         return new Pkcs10CertificationRequest(signatureAlg, x509Name, publicKey, attributes, privateKey);
     }
 
-    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, byte[] publicKey, AsymmetricKeyParameter aikPublicKey)
+    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, byte[] publicKey, TpmKey aik)
     {
+        var aikPublicKey = Helpers.ToAsymmetricKeyParameter(aik, false);
         var subjectPubInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(aikPublicKey);
         var ski = new SubjectKeyIdentifier(subjectPubInfo);
         var signerId = new SignerIdentifier(ski.ToAsn1Object());
@@ -76,7 +78,7 @@ public static class Pkcs10RequestGenerator
                     new DerOctetString(attestationStatement)),
             new DerSet(                    
                 new DerSequence(new DerObjectIdentifier("2.23.133.8.12"), new DerOctetString(publicKey)), // tcg-at-tpmSecurityTarget
-                new DerSequence(new DerObjectIdentifier("2.23.133.8.3"), new DerOctetString(publicKeyToEncode))), // tcg-kp-AIKCertificate,
+                new DerSequence(new DerObjectIdentifier("2.23.133.8.3"), new DerOctetString(aik.Public))), // tcg-kp-AIKCertificate,
             new DerSet(),
             new DerSet(signerInfo));
     }

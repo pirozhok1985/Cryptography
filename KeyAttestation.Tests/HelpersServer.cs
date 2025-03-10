@@ -27,7 +27,7 @@ public class HelpersServer
         Assert.IsType<AttestationData>(attestationRequest);
         Assert.NotNull(attestationRequest.Attestation);
         Assert.NotNull(attestationRequest.Signature);
-        Assert.NotNull(attestationRequest.AikRsaPublic);
+        Assert.NotNull(attestationRequest.AikTpmPublic);
         Assert.NotNull(attestationRequest.ClientTpmPublic);
     }
 }
