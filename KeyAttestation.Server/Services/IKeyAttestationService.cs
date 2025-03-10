@@ -1,4 +1,4 @@
-using KeyAttestation.Server.Entities;
+using Attestation.Shared.Entities;
 
 namespace KeyAttestation.Server.Services;
 
@@ -7,4 +7,6 @@ public interface IKeyAttestationService
     public Task<AttestationData> GetAttestationDataAsync(string csr, CancellationToken cancellationToken = default);
 
     public Task<byte[]> MakeCredentialsAsync(AttestationData data, byte[] ekPub, CancellationToken cancellationToken = default);
+
+    public Task<AttestationResult> AttestAsync(AttestationData data, CancellationToken cancellationToken = default);
 }

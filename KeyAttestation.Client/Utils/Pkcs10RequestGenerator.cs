@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
-using KeyAttestation.Client.Entities;
+using Attestation.Shared;
+using Attestation.Shared.Entities;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
 using Org.BouncyCastle.Asn1.Pkcs;

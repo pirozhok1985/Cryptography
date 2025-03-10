@@ -1,5 +1,4 @@
-using KeyAttestation.Client.Entities;
-using Org.BouncyCastle.Pkcs;
+using Attestation.Shared.Entities;
 
 namespace KeyAttestation.Client.Services;
 

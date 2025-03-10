@@ -1,7 +1,7 @@
 using System.IO.Abstractions.TestingHelpers;
+using Attestation.Shared;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
-using Shouldly;
 
 namespace KeyAttestation.Tests;
 
@@ -15,7 +15,7 @@ public class HelpersClient
     public void ShouldReturnValidHexString(uint value, string pattern)
     {
         // Act
-        var result = Client.Utils.Helpers.ToHexString(value);
+        var result = Helpers.ToHexString(value);
         
         // Assert
         Assert.NotEmpty(result);
@@ -37,7 +37,7 @@ public class HelpersClient
         
         // Act
         var csr = (Pkcs10CertificationRequest)pemReader.ReadObject();
-        await Client.Utils.Helpers.WriteCsrAsync(csr, fileName, fileSystemMock.File);
+        await Helpers.WriteCsrAsync(csr, fileName, fileSystemMock.File);
         
         // Assert
         Assert.True(fileSystemMock.FileExists(fileName));

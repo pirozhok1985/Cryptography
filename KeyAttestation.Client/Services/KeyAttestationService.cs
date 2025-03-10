@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
-using KeyAttestation.Client.Entities;
+using Attestation.Shared;
+using Attestation.Shared.Entities;
 using KeyAttestation.Client.Utils;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto;

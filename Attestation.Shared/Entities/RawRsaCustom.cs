@@ -1,8 +1,7 @@
 using System.Numerics;
-using KeyAttestation.Client.Utils;
 using Tpm2Lib;
 
-namespace KeyAttestation.Client.Entities;
+namespace Attestation.Shared.Entities;
 
 public class RawRsaCustom
 {

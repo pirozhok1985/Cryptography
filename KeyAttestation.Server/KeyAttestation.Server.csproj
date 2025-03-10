@@ -16,4 +16,8 @@
         <Protobuf Include="Protos/key_attestation_v1.proto" GrpcServices="Server" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Attestation.Shared\Attestation.Shared.csproj" />
+    </ItemGroup>
+
 </Project>

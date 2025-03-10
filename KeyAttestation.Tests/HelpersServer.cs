@@ -1,5 +1,5 @@
-using KeyAttestation.Server.Entities;
-using KeyAttestation.Server.Utils;
+using Attestation.Shared;
+using Attestation.Shared.Entities;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
