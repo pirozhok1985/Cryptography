@@ -12,29 +12,49 @@ public class KeyAttestationService : IKeyAttestationService
     {
         _logger = logger;
     }
-    public Task<AttestationData> GetAttestationDataAsync(string csr, CancellationToken cancellationToken = default)
+    public AttestationData GetAttestationDataAsync(string csr)
     {
         var certificationRequest = Helpers.FromPemCsr(csr, _logger);
         if (certificationRequest is null)
         {
-            return Task.FromResult(AttestationData.Empty);
+            return AttestationData.Empty;
         }
 
         var attestationRequest = Helpers.GetAttestationRequest(certificationRequest, _logger);
 
-        return Task.FromResult(attestationRequest);
+        return attestationRequest;
     }
 
-    public Task<byte[]> MakeCredentialsAsync(AttestationData data, byte[] ekPub, CancellationToken cancellationToken = default)
+    public byte[] MakeCredentialsAsync(AttestationData data, byte[] ekPub)
     {
         var ekTpmPub = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
         var secret = Environment.MachineName.Select(Convert.ToByte).ToArray();
         var idObject = ekTpmPub.CreateActivationCredentials(secret, data.AikTpmPublic!.GetName(), out _);
-        return Task.FromResult(Marshaller.GetTpmRepresentation(idObject));
+        return Marshaller.GetTpmRepresentation(idObject);
     }
 
-    public Task<AttestationResult> AttestAsync(AttestationData data, CancellationToken cancellationToken = default)
+    public AttestationResult AttestAsync(AttestationData data)
     {
-        throw new NotImplementedException();
+        var signature = new SignatureRsapss(data.AikTpmPublic!.nameAlg, data.Signature);
+        if (!data.AikTpmPublic.VerifyCertify(null, null, data.Attestation, data.ClientTpmPublic!.GetName(), signature))
+        {
+            _logger.LogError("Attestation failed!");
+            return new AttestationResult
+            {
+                Result = false,
+                Message = "Attestation failed!",
+            };
+        }
+
+        return new AttestationResult
+        {
+            Result = true,
+            Message = "Attestation has been successfully passed!"
+        };
+    }
+
+    public bool CheckActivatedCredentials(byte[] clientCredentials, byte[] serverCredentials)
+    {
+       return Globs.ArraysAreEqual(clientCredentials, serverCredentials);
     }
 }

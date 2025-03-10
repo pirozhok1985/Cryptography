@@ -14,7 +14,7 @@ var client = new KeyAttestationV1.KeyAttestationService.KeyAttestationServiceCli
 using var keyAttestationService = new KeyAttestationService(fileSystem, logger, client);
 var result = await keyAttestationService.GeneratePkcs10CertificationRequestAsync(true,
     "/home/sigma.sbrf.ru@18497320/temp/openssl_test/client.csr");
-var response = await client.ActivateCredentialsAsync(new ActivationRequest
+var response = await client.MakeCredentialsAsync(new ActivationRequest
 {
     Csr = result.Csr,
     EkPub = ByteString.CopyFrom(result.Ek!.Public)

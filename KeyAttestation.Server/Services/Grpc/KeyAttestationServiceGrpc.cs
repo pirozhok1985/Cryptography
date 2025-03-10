@@ -21,33 +21,44 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
     {
         if (!_attestCandidates.TryGetValue(request.CorrelationId, out var candidate))
         {
-            var message = $"Attestation candidate id: {request.CorrelationId} does not exist!";
             _logger.LogError("Attestation candidate id: {Correlation_ID} does not exist!", request.CorrelationId);
             return await Task.FromResult(new AttestationResponse
             {
                 IsAttested = false,
-                Message = message,
+                Message = $"Attestation candidate id: {request.CorrelationId} does not exist!",
                 Certificate = null
             });
         }
 
-        var attestResult = await _keyAttestationService.AttestAsync(candidate.Data, context.CancellationToken);
+        if (_keyAttestationService.CheckActivatedCredentials(request.DecryptedCredentials.ToByteArray(),
+                candidate.CredentialBlob))
+        {
+            _logger.LogError("Credential activation failed!");
+            return await Task.FromResult(new AttestationResponse
+            {
+                IsAttested = false,
+                Message = "Credential activation failed!",
+                Certificate = null
+            });
+        }
+
+        var attestResult = _keyAttestationService.AttestAsync(candidate.Data);
         
         // Should be a request to CA in order to get certificate
 
         return await Task.FromResult(new AttestationResponse
         {
             IsAttested = attestResult.Result,
-            Message = "Success",
+            Message = attestResult.Message,
             Certificate = "-----BEGIN CERTIFICATE-----....."
         });
     }
 
-    public override async Task<ActivationResponse> ActivateCredentials(ActivationRequest request, ServerCallContext context)
+    public override Task<ActivationResponse> MakeCredentials(ActivationRequest request, ServerCallContext context)
     {
-        var attestData = await _keyAttestationService.GetAttestationDataAsync(request.Csr, context.CancellationToken);
+        var attestData = _keyAttestationService.GetAttestationDataAsync(request.Csr);
         attestData.Csr = request.Csr;
-        var creds = await _keyAttestationService.MakeCredentialsAsync(attestData, request.EkPub.ToByteArray(), context.CancellationToken);
+        var creds = _keyAttestationService.MakeCredentialsAsync(attestData, request.EkPub.ToByteArray());
         var activationResponse = new ActivationResponse
         {
             EncryptedCredentials = ByteString.CopyFrom(creds),
@@ -56,9 +67,9 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
         if (!_attestCandidates.TryAdd(activationResponse.CorrelationId, (attestData,creds)))
         {
             _logger.LogError("Fail to save attestation data!");
-            return new ActivationResponse();
+            return Task.FromResult(new ActivationResponse());
         }
         
-        return activationResponse;
+        return Task.FromResult(activationResponse);
     }
 }

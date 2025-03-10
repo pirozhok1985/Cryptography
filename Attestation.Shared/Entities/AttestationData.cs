@@ -12,7 +12,7 @@ public class AttestationData
     
     public TpmPublic? ClientTpmPublic { get; init; }
     
-    public string Csr { get; set; }
+    public string? Csr { get; set; }
 
     public AttestationData(Attest? attestation, byte[] signature, TpmPublic? aikTpmPublic, TpmPublic? clientTpmPublic)
     {

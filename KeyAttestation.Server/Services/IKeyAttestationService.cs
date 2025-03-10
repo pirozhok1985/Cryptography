@@ -4,9 +4,11 @@ namespace KeyAttestation.Server.Services;
 
 public interface IKeyAttestationService
 {
-    public Task<AttestationData> GetAttestationDataAsync(string csr, CancellationToken cancellationToken = default);
+    public AttestationData GetAttestationDataAsync(string csr);
 
-    public Task<byte[]> MakeCredentialsAsync(AttestationData data, byte[] ekPub, CancellationToken cancellationToken = default);
+    public byte[] MakeCredentialsAsync(AttestationData data, byte[] ekPub);
 
-    public Task<AttestationResult> AttestAsync(AttestationData data, CancellationToken cancellationToken = default);
+    public AttestationResult AttestAsync(AttestationData data);
+
+    public bool CheckActivatedCredentials(byte[] clientCredentials, byte[] serverCredentials);
 }

@@ -4,7 +4,7 @@ package key_attestation_v1;
 
 service KeyAttestationService {
   rpc Attest (AttestationRequest) returns (AttestationResponse);
-  rpc ActivateCredentials(ActivationRequest) returns (ActivationResponse);
+  rpc MakeCredentials(ActivationRequest) returns (ActivationResponse);
 }
 
 message AttestationRequest {
