@@ -8,6 +8,7 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.Tls;
 using Tpm2Lib;
 
 namespace Attestation.Shared;
@@ -165,5 +166,42 @@ public static class Helpers
         }
         
         return (aikTpmPublicKey, clientTpmPublicKey)!;
+    }
+
+    public static bool VerifyCertify(AttestationData data, ILogger logger)
+    {
+        if (data.Attestation!.type != TpmSt.AttestCertify)
+        {
+            logger.LogError("VerifyCertify failed! Attestation is not TpmSt.AttestCertify!");
+            return false;
+        }
+
+        if (!Globs.ArraysAreEqual(data.Attestation.extraData, Array.Empty<byte>()))
+        {
+            logger.LogError("VerifyCertify failed! ExtraData should be empty!");
+            return false;
+        }
+
+        if (data.Attestation.magic != Generated.Value)
+        {
+            logger.LogError("VerifyCertify failed! Magic number is incorrect!");
+            return false;
+        }
+
+        var certInfo = (CertifyInfo)data.Attestation.attested;
+        if (!Globs.ArraysAreEqual(certInfo.name, data.ClientTpmPublic!.GetName()))
+        {
+            logger.LogError("VerifyCertify failed! ClientTpmPublic does not match with attested entity name!");
+            return false;
+        }
+
+        var sigHash = TpmHash.FromData(TpmAlgId.Sha256, data.Attestation.GetTpmRepresentation());
+        if (!data.AikTpmPublic!.VerifySignatureOverHash(sigHash, Marshaller.FromTpmRepresentation<SignatureRsassa>(data.Signature)))
+        {
+            logger.LogError("VerifyCertify failed! Signature is incorrect!");
+            return false;
+        }
+
+        return true;
     }
 }

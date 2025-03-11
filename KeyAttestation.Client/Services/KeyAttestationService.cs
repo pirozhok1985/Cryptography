@@ -31,14 +31,18 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         var aik = _tpmFacade.CreateAk(ek.Handle!);
         var srkHandlePersistent = TpmHandle.Persistent(5);
         var clientTpmKey = _tpmFacade.CreateKey(srkHandlePersistent);
-        var attestation = _tpmFacade.Tpm!.Certify(clientTpmKey.Handle, aik.Handle, null, new SchemeRsassa(TpmAlgId.Sha256),
+        var attestation = _tpmFacade.Tpm!.Certify(
+            clientTpmKey.Handle,
+            aik.Handle,
+            [],
+            new SchemeRsassa(aik.Public!.nameAlg),
             out var signature);
 
         var clientRsaKeyPair = new AsymmetricCipherKeyPair(
             Helpers.ToAsymmetricKeyParameter(clientTpmKey, false),
             Helpers.ToAsymmetricKeyParameter(clientTpmKey, true));
 
-        var cms = Pkcs10RequestGenerator.GenerateCms(((SignatureRsassa)signature).sig, attestation.GetTpmRepresentation(), clientTpmKey.Public!.GetTpmRepresentation(), aik);
+        var cms = Pkcs10RequestGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey.Public!.GetTpmRepresentation(), aik);
         var csr = Pkcs10RequestGenerator.Generate(clientRsaKeyPair.Public, clientRsaKeyPair.Private, cms);
 
         if (saveAsPemEncodedFile)

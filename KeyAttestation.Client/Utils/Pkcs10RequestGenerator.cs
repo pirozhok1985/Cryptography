@@ -65,11 +65,10 @@ public static class Pkcs10RequestGenerator
         var signerId = new SignerIdentifier(ski.ToAsn1Object());
         var signerInfoDgstAlg = new AlgorithmIdentifier(new DerObjectIdentifier("2.16.840.1.101.3.4.2.1"));
         var sigAlg = new AlgorithmIdentifier(PkcsObjectIdentifiers.RsaEncryption);
-        var signature = new BerOctetString(sigData);
+        var signature = new DerOctetString(sigData);
         var signedAttributes = new DerSet();
         var unsignedAttributes = new DerSet();
         var signerInfo = new SignerInfo(signerId, signerInfoDgstAlg, Asn1Set.GetInstance(signedAttributes), sigAlg, signature, Asn1Set.GetInstance(unsignedAttributes));
-        var publicKeyToEncode = RSA.Create(DotNetUtilities.ToRSAParameters((RsaKeyParameters)aikPublicKey)).ExportRSAPublicKey();
         
         var digestAlgId = new DerObjectIdentifier("2.16.840.1.101.3.4.2.1");
         return new SignedData(

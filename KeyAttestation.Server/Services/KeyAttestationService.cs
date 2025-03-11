@@ -39,8 +39,7 @@ public class KeyAttestationService : IKeyAttestationService
 
     public AttestationResult AttestAsync(AttestationData data)
     {
-        var signature = new SignatureRsapss(data.AikTpmPublic!.nameAlg, data.Signature);
-        if (!data.AikTpmPublic.VerifyCertify(null, null, data.Attestation, data.ClientTpmPublic!.GetName(), signature))
+        if (!Helpers.VerifyCertify(data, _logger))
         {
             _logger.LogError("Attestation failed!");
             return new AttestationResult
