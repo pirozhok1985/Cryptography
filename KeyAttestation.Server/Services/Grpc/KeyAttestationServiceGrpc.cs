@@ -19,6 +19,7 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
     }
     public override async Task<AttestationResponse> Attest(AttestationRequest request, ServerCallContext context)
     {
+        _logger.LogInformation("Start processing Attestation request");
         if (!_attestCandidates.TryGetValue(request.CorrelationId, out var candidate))
         {
             _logger.LogError("Attestation candidate id: {Correlation_ID} does not exist!", request.CorrelationId);
@@ -30,6 +31,7 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
             });
         }
 
+        _logger.LogInformation("Trying to compare decrypted cred with saved one");
         if (!_keyAttestationService.CheckActivatedCredentials(request.DecryptedCredentials.ToByteArray(),
                 candidate.CredentialBlob))
         {
@@ -41,11 +43,14 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
                 Certificate = null
             });
         }
-
-        var attestResult = _keyAttestationService.AttestAsync(candidate.Data);
+        _logger.LogInformation("Activated credential has successfully been checked!");
         
+        _logger.LogInformation("Start attesting certified data!");
+        var attestResult = _keyAttestationService.AttestAsync(candidate.Data);
+        _logger.LogInformation("Attesting certified data finifshed!");
         // Should be a request to CA in order to get certificate
-
+        
+        _logger.LogInformation("Processing Attestation request finished!");
         return await Task.FromResult(new AttestationResponse
         {
             IsAttested = attestResult.Result,
@@ -56,6 +61,7 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
 
     public override Task<ActivationResponse> MakeCredential(ActivationRequest request, ServerCallContext context)
     {
+        _logger.LogInformation("Start processing MakeCredential request");
         var attestData = _keyAttestationService.GetAttestationDataAsync(request.Csr);
         attestData.Csr = request.Csr;
         var cred = _keyAttestationService.MakeCredentialsAsync(attestData, request.EkPub.ToByteArray());
@@ -68,10 +74,9 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
         };
         if (!_attestCandidates.TryAdd(activationResponse.CorrelationId, (attestData,cred.ClearSecret)))
         {
-            _logger.LogError("Fail to save attestation data!");
-            return Task.FromResult(new ActivationResponse());
+            _logger.LogError("Fail to save attestation data! Key already exists!");
         }
-        
+        _logger.LogInformation("Processing MakeCredential request finished!");
         return Task.FromResult(activationResponse);
     }
 }

@@ -110,9 +110,13 @@ public static class Helpers
     public static AttestationData GetAttestationRequest(Pkcs10CertificationRequest request, ILogger logger)
     {
         var attestationStatement = GetSignedData(request);
+        logger.LogInformation("Successfully retrieved Signed data ({Data}) from Pkcs10CertificationRequest", typeof(SignedData));
         var attest = GetAttestData(attestationStatement);
+        logger.LogInformation("Successfully retrieved Attestation data ({Attest}) from Signed data", typeof(Attest));
         var signature = GetAttestSignature(attestationStatement);
+        logger.LogInformation("Successfully retrieved signature ({Sig}) from Signed data", typeof(byte[]));
         var keys = GetSignedDataKeys(attestationStatement);
+        logger.LogInformation("Successfully retrieved aik and client keys ({Keys}) from Signed data", typeof(TpmPublic));
         return new AttestationData(attest, signature, keys.Aik, keys.Client);
     }
 

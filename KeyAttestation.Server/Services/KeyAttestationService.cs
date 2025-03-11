@@ -28,8 +28,12 @@ public class KeyAttestationService : IKeyAttestationService
     public Credendtial MakeCredentialsAsync(AttestationData data, byte[] ekPub)
     {
         var ekTpmPub = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
+        
+        // Something that RA should take account with in order to compare with agent make credential response
         var secret = Environment.MachineName.Select(Convert.ToByte).ToArray();
+        
         var idObject = ekTpmPub.CreateActivationCredentials(secret, data.AikTpmPublic!.GetName(), out var encSecret);
+        _logger.LogInformation("Encrypted credential has successfully been created! Cred: {Cred}.", typeof(IdObject));
         return new Credendtial(
             idObject.encIdentity,
             encSecret,
