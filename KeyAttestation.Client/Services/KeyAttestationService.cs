@@ -55,14 +55,17 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
     }
 
     public Task<CredentialActivationResult> ActivateCredentialAsync(
-        byte[] encryptedredential,
-        byte[] encrypteSecret,
+        IdObject encryptedCredential,
+        byte[] encryptedSecret,
         TpmKey ek,
         TpmKey aik,
         CancellationToken cancellationToken)
     {
-        var activatedCredential = _tpmFacade!.Tpm!.ActivateCredential(ek.Handle, aik.Handle,
-            Marshaller.FromTpmRepresentation<IdObject>(encryptedredential), encrypteSecret);
+        var activatedCredential = _tpmFacade!.Tpm!.ActivateCredential(
+            aik.Handle,
+            ek.Handle,
+            encryptedCredential,
+            encryptedSecret);
         return Task.FromResult(new CredentialActivationResult
         {
             ActivatedCredentials = activatedCredential

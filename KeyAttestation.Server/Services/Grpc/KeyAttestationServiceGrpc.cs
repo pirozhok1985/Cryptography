@@ -30,7 +30,7 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
             });
         }
 
-        if (_keyAttestationService.CheckActivatedCredentials(request.DecryptedCredentials.ToByteArray(),
+        if (!_keyAttestationService.CheckActivatedCredentials(request.DecryptedCredentials.ToByteArray(),
                 candidate.CredentialBlob))
         {
             _logger.LogError("Credential activation failed!");
@@ -58,14 +58,15 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
     {
         var attestData = _keyAttestationService.GetAttestationDataAsync(request.Csr);
         attestData.Csr = request.Csr;
-        var creds = _keyAttestationService.MakeCredentialsAsync(attestData, request.EkPub.ToByteArray());
+        var cred = _keyAttestationService.MakeCredentialsAsync(attestData, request.EkPub.ToByteArray());
         var activationResponse = new ActivationResponse
         {
-            EncryptedCredential = ByteString.CopyFrom(creds.CredentialBlob),
-            EncryptedSecret = ByteString.CopyFrom(creds.EncryptedSecret),
+            EncryptedIdentity = ByteString.CopyFrom(cred.EncryptedIdentity),
+            IntegrityHmac = ByteString.CopyFrom(cred.IntegrityHmac),
+            EncryptedSecret = ByteString.CopyFrom(cred.EncryptedSecret),
             CorrelationId = 0
         };
-        if (!_attestCandidates.TryAdd(activationResponse.CorrelationId, (attestData,creds.CredentialBlob)))
+        if (!_attestCandidates.TryAdd(activationResponse.CorrelationId, (attestData,cred.ClearSecret)))
         {
             _logger.LogError("Fail to save attestation data!");
             return Task.FromResult(new ActivationResponse());

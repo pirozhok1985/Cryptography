@@ -24,7 +24,8 @@ message ActivationRequest {
 }
 
 message ActivationResponse {
-  bytes encrypted_credential = 1;
-  bytes encrypted_secret = 2;
-  int32 correlation_id = 3;
+  bytes encrypted_identity = 1;
+  bytes integrity_hmac = 2;
+  bytes encrypted_secret = 3;
+  int32 correlation_id = 4;
 }

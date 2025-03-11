@@ -8,6 +8,7 @@ using Grpc.Net.Client;
 using KeyAttestationV1;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Tls;
+using Tpm2Lib;
 using KeyAttestationService = KeyAttestation.Client.Services.KeyAttestationService;
 
 var fileSystem = new FileSystem();
@@ -36,8 +37,9 @@ var makeCredResponse = await client.MakeCredentialAsync(new ActivationRequest
     EkPub = ByteString.CopyFrom(result.Ek!.Public)
 });
 
+var cred = new IdObject(makeCredResponse.IntegrityHmac.ToByteArray(), makeCredResponse.EncryptedIdentity.ToByteArray());
 var activatedCred = await keyAttestationService.ActivateCredentialAsync(
-    makeCredResponse.EncryptedCredential.ToByteArray(),
+    cred,
     makeCredResponse.EncryptedSecret.ToByteArray(),
     result.Ek,
     result.Aik!,

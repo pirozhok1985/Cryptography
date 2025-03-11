@@ -1,5 +1,6 @@
 using Attestation.Shared;
 using Attestation.Shared.Entities;
+using Google.Protobuf;
 using KeyAttestation.Server.Services;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.OpenSsl;
@@ -45,9 +46,10 @@ public class HelpersServer
         var ekPub = Convert.FromBase64String(EkPub);
         var attestationData = keyAttestationService.GetAttestationDataAsync(Csr);
         var attestBlob = keyAttestationService.MakeCredentialsAsync(attestationData, ekPub);
-        
+
         // Assert
-        Assert.NotEmpty(attestBlob.CredentialBlob);
+        Assert.NotEmpty(attestBlob.EncryptedIdentity);
+        Assert.NotEmpty(attestBlob.IntegrityHmac);
         Assert.NotEmpty(attestBlob.EncryptedSecret);
     }
 }

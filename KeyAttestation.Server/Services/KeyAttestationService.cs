@@ -30,7 +30,11 @@ public class KeyAttestationService : IKeyAttestationService
         var ekTpmPub = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
         var secret = Environment.MachineName.Select(Convert.ToByte).ToArray();
         var idObject = ekTpmPub.CreateActivationCredentials(secret, data.AikTpmPublic!.GetName(), out var encSecret);
-        return new Credendtial(Marshaller.GetTpmRepresentation(idObject), encSecret, secret);
+        return new Credendtial(
+            idObject.encIdentity,
+            encSecret,
+            secret,
+            idObject.integrityHMAC);
     }
 
     public AttestationResult AttestAsync(AttestationData data)
