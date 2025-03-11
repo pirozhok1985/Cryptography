@@ -47,6 +47,7 @@ public class HelpersServer
         var attestBlob = keyAttestationService.MakeCredentialsAsync(attestationData, ekPub);
         
         // Assert
-        Assert.NotEmpty(attestBlob);
+        Assert.NotEmpty(attestBlob.CredentialBlob);
+        Assert.NotEmpty(attestBlob.EncryptedSecret);
     }
 }

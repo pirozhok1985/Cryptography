@@ -25,12 +25,12 @@ public class KeyAttestationService : IKeyAttestationService
         return attestationRequest;
     }
 
-    public byte[] MakeCredentialsAsync(AttestationData data, byte[] ekPub)
+    public Credendtial MakeCredentialsAsync(AttestationData data, byte[] ekPub)
     {
         var ekTpmPub = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
         var secret = Environment.MachineName.Select(Convert.ToByte).ToArray();
-        var idObject = ekTpmPub.CreateActivationCredentials(secret, data.AikTpmPublic!.GetName(), out _);
-        return Marshaller.GetTpmRepresentation(idObject);
+        var idObject = ekTpmPub.CreateActivationCredentials(secret, data.AikTpmPublic!.GetName(), out var encSecret);
+        return new Credendtial(Marshaller.GetTpmRepresentation(idObject), encSecret, secret);
     }
 
     public AttestationResult AttestAsync(AttestationData data)

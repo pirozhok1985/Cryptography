@@ -4,7 +4,7 @@ package key_attestation_v1;
 
 service KeyAttestationService {
   rpc Attest (AttestationRequest) returns (AttestationResponse);
-  rpc MakeCredentials(ActivationRequest) returns (ActivationResponse);
+  rpc MakeCredential(ActivationRequest) returns (ActivationResponse);
 }
 
 message AttestationRequest {
@@ -24,6 +24,7 @@ message ActivationRequest {
 }
 
 message ActivationResponse {
-  bytes encrypted_credentials = 1;
-  int32 correlation_id = 2;
+  bytes encrypted_credential = 1;
+  bytes encrypted_secret = 2;
+  int32 correlation_id = 3;
 }

@@ -6,7 +6,7 @@ public interface IKeyAttestationService
 {
     public AttestationData GetAttestationDataAsync(string csr);
 
-    public byte[] MakeCredentialsAsync(AttestationData data, byte[] ekPub);
+    public Credendtial MakeCredentialsAsync(AttestationData data, byte[] ekPub);
 
     public AttestationResult AttestAsync(AttestationData data);
 

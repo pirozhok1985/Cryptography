@@ -54,17 +54,18 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
         });
     }
 
-    public override Task<ActivationResponse> MakeCredentials(ActivationRequest request, ServerCallContext context)
+    public override Task<ActivationResponse> MakeCredential(ActivationRequest request, ServerCallContext context)
     {
         var attestData = _keyAttestationService.GetAttestationDataAsync(request.Csr);
         attestData.Csr = request.Csr;
         var creds = _keyAttestationService.MakeCredentialsAsync(attestData, request.EkPub.ToByteArray());
         var activationResponse = new ActivationResponse
         {
-            EncryptedCredentials = ByteString.CopyFrom(creds),
+            EncryptedCredential = ByteString.CopyFrom(creds.CredentialBlob),
+            EncryptedSecret = ByteString.CopyFrom(creds.EncryptedSecret),
             CorrelationId = 0
         };
-        if (!_attestCandidates.TryAdd(activationResponse.CorrelationId, (attestData,creds)))
+        if (!_attestCandidates.TryAdd(activationResponse.CorrelationId, (attestData,creds.CredentialBlob)))
         {
             _logger.LogError("Fail to save attestation data!");
             return Task.FromResult(new ActivationResponse());

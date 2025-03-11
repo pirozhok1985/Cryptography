@@ -1,6 +1,6 @@
 namespace Attestation.Shared.Entities;
 
-public class CredentialsActivationResult
+public class CredentialActivationResult
 {
     public byte[]? ActivatedCredentials { get; set; }
 }
