@@ -14,27 +14,31 @@ public class KeyAttestationService : IKeyAttestationService
     }
     public AttestationData GetAttestationDataAsync(string csr)
     {
+        _logger.LogInformation("Constructing Pkcs10CertificationRequest from csr: {@Csr}", csr);
         var certificationRequest = Helpers.FromPemCsr(csr, _logger);
         if (certificationRequest is null)
         {
             return AttestationData.Empty;
         }
+        _logger.LogInformation("CertificationRequest has been successfully constructed! Result: {@Pkcs10}", certificationRequest);
 
-        var attestationRequest = Helpers.GetAttestationRequest(certificationRequest, _logger);
+        _logger.LogInformation("Retrieving attestation data!");
+        var attestationData = Helpers.GetAttestationRequest(certificationRequest, _logger);
+        _logger.LogInformation("Attestation data has been successfully retrieved! Result: {@AttestationData}!", attestationData);
 
-        return attestationRequest;
+        return attestationData;
     }
 
-    public Credendtial MakeCredentialsAsync(AttestationData data, byte[] ekPub)
+    public Credential MakeCredentialsAsync(AttestationData data, byte[] ekPub)
     {
         var ekTpmPub = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
         
-        // Something that RA should take account with in order to compare with agent make credential response
+        // Something that RA should take into account in order to compare with agent`s make_credential response
         var secret = Environment.MachineName.Select(Convert.ToByte).ToArray();
         
         var idObject = ekTpmPub.CreateActivationCredentials(secret, data.AikTpmPublic!.GetName(), out var encSecret);
-        _logger.LogInformation("Encrypted credential has successfully been created! Cred: {Cred}.", typeof(IdObject));
-        return new Credendtial(
+        _logger.LogInformation("Encrypted credential has successfully been created! Cred: {@Cred}.", idObject);
+        return new Credential(
             idObject.encIdentity,
             encSecret,
             secret,
