@@ -22,11 +22,11 @@ public class KeyAttestationService : IKeyAttestationService
         {
             return AttestationData.Empty;
         }
-        _logger.LogInformation("CertificationRequest has been successfully constructed! Result: {@Pkcs10}", certificationRequest);
+        _logger.LogInformation("CertificationRequest has been successfully constructed! Result: {@Request}", certificationRequest);
 
         _logger.LogInformation("Retrieving attestation data!");
         var attestationData = GetAttestationRequest(certificationRequest, _logger);
-        _logger.LogInformation("Attestation data has been successfully retrieved! Result: {@AttestationData}!", attestationData);
+        _logger.LogInformation("Attestation data has been successfully retrieved! Result: {@AttestData}!", attestationData);
 
         return attestationData;
     }

@@ -42,7 +42,7 @@ var makeCredResponse = await client.MakeCredentialAsync(new ActivationRequest
     EkPub = ByteString.CopyFrom(result.Ek!.Public)
 });
 logger.LogInformation(
-    "Received Activation Response!Content: {@Content}", makeCredResponse);
+    "Received Activation Response! Result: {@Content}", makeCredResponse);
 
 var cred = new IdObject(makeCredResponse.IntegrityHmac.ToByteArray(), makeCredResponse.EncryptedIdentity.ToByteArray());
 
@@ -53,7 +53,7 @@ var activatedCred = await keyAttestationService.ActivateCredentialAsync(
     result.Ek,
     result.Aik!,
     CancellationToken.None);
-logger.LogInformation("Activation credential successfully finished! Result: {@Result}", activatedCred);
+logger.LogInformation("Activation credential successfully finished! Result: {@Content}", activatedCred);
 
 logger.LogInformation("Sending attestation request!");
 var attestResponse = await client.AttestAsync(new AttestationRequest
@@ -61,4 +61,4 @@ var attestResponse = await client.AttestAsync(new AttestationRequest
     DecryptedCredentials = ByteString.CopyFrom(activatedCred.ActivatedCredentials),
     CorrelationId = makeCredResponse.CorrelationId
 });
-logger.LogInformation("Received Attestation Response!Content: {@Content}", attestResponse);
+logger.LogInformation("Received Attestation Response! Result: {@Content}", attestResponse);
