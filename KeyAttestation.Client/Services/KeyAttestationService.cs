@@ -4,6 +4,7 @@ using KeyAttestation.Client.Extensions;
 using KeyAttestation.Client.Utils;
 using Microsoft.Extensions.Logging;
 using Tpm2Lib;
+using Exception = System.Exception;
 
 namespace KeyAttestation.Client.Services;
 
@@ -20,31 +21,58 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         _fileSystem = fileSystem;
         _logger = logger;
         _client = client;
-        _tpmFacade = new TpmFacade();
+        _tpmFacade = new TpmFacade(logger);
         _tpmFacade.InitialiseTpm("/dev/tpmrm0");
     }
     
-    public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequestAsync(bool saveAsPemEncodedFile, string? fileName = null, CancellationToken cancellationToken = default)
+    public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(bool saveAsPemEncodedFile, string? fileName = null)
     {
         var ek = _tpmFacade!.CreateEk();
+        if (ek == null)
+        {
+            return Pksc10GenerationResult.Empty;
+        }
+
         var aik = _tpmFacade.CreateAk(ek.Handle!);
+        if (aik == null)
+        {
+            return Pksc10GenerationResult.Empty;
+        }
+
+        // Parent key persistent handle
         var srkHandlePersistent = TpmHandle.Persistent(5);
+        
         var clientTpmKey = _tpmFacade.CreateKey(srkHandlePersistent);
-        var attestation = _tpmFacade.Tpm!.Certify(
-            clientTpmKey.Handle,
-            aik.Handle,
-            [],
-            new SchemeRsassa((TpmAlgId)aik.Public!.nameAlg),
-            out var signature);
+        if (clientTpmKey == null)
+        {
+            return Pksc10GenerationResult.Empty;
+        }
 
-        var clientRsaKeyPair = clientTpmKey.ToAsymmetricCipherKeyPair();
+        Attest? attestation;
+        ISignatureUnion? signature;
+        try
+        {
+            attestation = _tpmFacade.Tpm!.Certify(
+                clientTpmKey?.Handle,
+                aik?.Handle,
+                [],
+                new SchemeRsassa(aik!.Public!.nameAlg),
+                out signature);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Attestation statement generation failed! Details: {Messgage}", e.Message);
+            return Pksc10GenerationResult.Empty;
+        }
 
-        var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey.Public!.GetTpmRepresentation(), aik);
+        var clientRsaKeyPair = clientTpmKey!.ToAsymmetricCipherKeyPair();
+
+        var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey!.Public!.GetTpmRepresentation(), aik);
         var csr = Pkcs10RequestGenerator.Generate(clientRsaKeyPair.Public, clientRsaKeyPair.Private, cms);
 
         if (saveAsPemEncodedFile)
         {
-            await csr.WriteCsrAsync(fileName, _fileSystem.File, cancellationToken);
+            await csr.WriteCsrAsync(fileName, _fileSystem.File);
         }
 
         return new Pksc10GenerationResult
@@ -55,22 +83,26 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         };
     }
 
-    public Task<CredentialActivationResult> ActivateCredentialAsync(
+    public CredentialActivationResult ActivateCredential(
         IdObject encryptedCredential,
         byte[] encryptedSecret,
         TpmKey ek,
-        TpmKey aik,
-        CancellationToken cancellationToken)
+        TpmKey aik)
     {
-        var activatedCredential = _tpmFacade!.Tpm!.ActivateCredential(
-            aik.Handle,
-            ek.Handle,
-            encryptedCredential,
-            encryptedSecret);
-        return Task.FromResult(new CredentialActivationResult
+        try
         {
-            ActivatedCredentials = activatedCredential
-        });
+            var activatedCredential = _tpmFacade!.Tpm!.ActivateCredential(
+                aik.Handle,
+                ek.Handle,
+                encryptedCredential,
+                encryptedSecret);
+            return new CredentialActivationResult(activatedCredential);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Attestation statement activation failed! Details: {Message}", e.Message);
+            return CredentialActivationResult.Empty;
+        }
     }
 
     public void Dispose()

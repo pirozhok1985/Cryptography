@@ -7,7 +7,6 @@ using Google.Protobuf;
 using Grpc.Net.Client;
 using KeyAttestationV1;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Tls;
 using Tpm2Lib;
 using KeyAttestationService = KeyAttestation.Client.Services.KeyAttestationService;
 
@@ -30,9 +29,15 @@ var client = new KeyAttestationV1.KeyAttestationService.KeyAttestationServiceCli
 
 using var keyAttestationService = new KeyAttestationService(fileSystem, logger, client);
 
-logger.LogInformation("Start generating PKCS10 certificate request");
-var result = await keyAttestationService.GeneratePkcs10CertificationRequestAsync(true,
+logger.LogInformation("Start generating PKCS10 certificate signinig request");
+var result = await keyAttestationService.GeneratePkcs10CertificationRequest(true,
     "/home/sigma.sbrf.ru@18497320/temp/openssl_test/client.csr");
+if (result.Ek == null || result.Aik == null || result.Csr == null)
+{
+    logger.LogError("Pkcs10 certificate signing request generation failed!");
+    return;
+}
+
 logger.LogInformation("Successfully generated PKCS10 certificate request and saved it on file system!");
 
 logger.LogInformation("Sending Activation Request!");
@@ -47,12 +52,18 @@ logger.LogInformation(
 var cred = new IdObject(makeCredResponse.IntegrityHmac.ToByteArray(), makeCredResponse.EncryptedIdentity.ToByteArray());
 
 logger.LogInformation("Start credential activation!");
-var activatedCred = await keyAttestationService.ActivateCredentialAsync(
+var activatedCred = keyAttestationService.ActivateCredential(
     cred,
     makeCredResponse.EncryptedSecret.ToByteArray(),
     result.Ek,
-    result.Aik!,
-    CancellationToken.None);
+    result.Aik!);
+
+if (activatedCred.ActivatedCredentials == null)
+{
+    logger.LogError("Credential activation failed!");
+    return;
+}
+
 logger.LogInformation("Activation credential successfully finished! Result: {@Content}", activatedCred);
 
 logger.LogInformation("Sending attestation request!");

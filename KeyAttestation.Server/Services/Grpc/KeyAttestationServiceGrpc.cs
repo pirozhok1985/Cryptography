@@ -48,6 +48,7 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
         _logger.LogInformation("Start attesting certified data!");
         var attestResult = _keyAttestationService.AttestAsync(candidate.Data);
         _logger.LogInformation("Attesting certified data finished! Data: {@AttestedData}", candidate.Data);
+        
         // Should be a request to CA in order to get certificate
         
         _logger.LogInformation("Processing Attestation request finished! Result: {@AttestResult}", attestResult);

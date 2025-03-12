@@ -13,7 +13,7 @@ public interface IKeyAttestationService
     /// <param name="fileName">The name of the file to be saved</param>
     /// <param name="cancellationToken">Task canceling support</param>
     /// <returns>Pkcs10GenerationResult:string? Csr, TpmKey? Ek, TpmKey? Aik</returns>
-    public Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequestAsync(bool saveAsPemEncodedFile, string? fileName, CancellationToken cancellationToken);
+    public Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(bool saveAsPemEncodedFile, string? fileName);
     
     /// <summary>
     /// Credential activation interface
@@ -24,5 +24,5 @@ public interface IKeyAttestationService
     /// <param name="aik">Attestation identity key(TpmPublick)</param>
     /// <param name="cancellationToken">Task canceling support</param>
     /// <returns>CredentialActivationResult: byte[] ActivatedCredentials</returns>
-    public Task<CredentialActivationResult> ActivateCredentialAsync(IdObject encryptedCredential, byte[] encryptedSecret, TpmKey ek, TpmKey aik, CancellationToken cancellationToken);
+    public CredentialActivationResult ActivateCredential(IdObject encryptedCredential, byte[] encryptedSecret, TpmKey ek, TpmKey aik);
 }

@@ -1,10 +1,13 @@
 using KeyAttestation.Client.Utils;
+using Microsoft.Extensions.Logging;
 using Tpm2Lib;
 
 namespace KeyAttestation.Client.Entities;
 
 public sealed class TpmFacade: IDisposable
 {
+    private readonly ILogger _logger;
+
     enum KeyType
     {
         Attestation,
@@ -15,6 +18,11 @@ public sealed class TpmFacade: IDisposable
     private LinuxTpmDevice? _tpmDevice;
     private bool _disposed;
 
+    public TpmFacade(ILogger logger)
+    {
+        _logger = logger;
+    }
+
     public void InitialiseTpm(string deviceName)
     {
         _tpmDevice = new LinuxTpmDevice(deviceName);
@@ -23,38 +31,47 @@ public sealed class TpmFacade: IDisposable
             _tpmDevice.Connect();
             Tpm = new Tpm2(_tpmDevice);
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            _logger.LogError("Failed to connect to TpmDevice! Details: {Message}", e.Message);
             Dispose();
         }
     }
     
-    public TpmKey CreateEk()
+    public TpmKey? CreateEk()
     {
         var ekAttributes = ObjectAttr.Restricted | ObjectAttr.Decrypt | ObjectAttr.FixedTPM | ObjectAttr.FixedParent |
                            ObjectAttr.UserWithAuth | ObjectAttr.SensitiveDataOrigin;
         var ekRsaParams = new RsaParms(new SymDefObject(TpmAlgId.Aes, 256, TpmAlgId.Cfb), null, 2048, 65537);
         var endorsementKeyTemplate = new TpmPublic(TpmAlgId.Sha256, ekAttributes, null, ekRsaParams, new Tpm2bPublicKeyRsa());
-        var ekHandle = Tpm!.CreatePrimary(
-            TpmHandle.RhEndorsement,
-            new SensitiveCreate(),
-            endorsementKeyTemplate,
-            null,
-            [],
-            out var ekPublic,
-            out _,
-            out _,
-            out _);
-        return new TpmKey(ekPublic, ekHandle);
+        try
+        {
+            var ekHandle = Tpm!.CreatePrimary(
+                TpmHandle.RhEndorsement,
+                new SensitiveCreate(),
+                endorsementKeyTemplate,
+                null,
+                [],
+                out var ekPublic,
+                out _,
+                out _,
+                out _);
+            return new TpmKey(ekPublic, ekHandle);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Failed to create Endorsement key! Details: {Message}", e.Message);
+            return null;
+        }
     }
     
-    public TpmKey CreateAk(TpmHandle parent)
+    public TpmKey? CreateAk(TpmHandle parent)
         => CreateKey(KeyType.Attestation, parent);
     
-    public TpmKey CreateKey(TpmHandle parent)
+    public TpmKey? CreateKey(TpmHandle parent)
         => CreateKey(KeyType.Ordinal, parent);
 
-    private TpmKey CreateKey(KeyType keyType, TpmHandle parent)
+    private TpmKey? CreateKey(KeyType keyType, TpmHandle parent)
     {
         ObjectAttr typedAttributes = default;
         RsaParms? keyParams = null;
@@ -74,18 +91,26 @@ public sealed class TpmFacade: IDisposable
                             ObjectAttr.UserWithAuth | ObjectAttr.SensitiveDataOrigin | typedAttributes;
         var keyTemplate = new TpmPublic(TpmAlgId.Sha256, keyAttributes, null, keyParams, new Tpm2bPublicKeyRsa());
 
-        var keyPriv = Tpm!.Create(
-            parent,
-            new SensitiveCreate(),
-            keyTemplate,
-            null,
-            [],
-            out var keyPub,
-            out _,
-            out _,
-            out _);
-        var handle = Tpm.Load(parent, keyPriv, keyPub);
-        return new TpmKey(keyPub, handle, keyPriv);
+        try
+        {
+            var keyPriv = Tpm!.Create(
+                parent,
+                new SensitiveCreate(),
+                keyTemplate,
+                null,
+                [],
+                out var keyPub,
+                out _,
+                out _,
+                out _);
+            var handle = Tpm.Load(parent, keyPriv, keyPub);
+            return new TpmKey(keyPub, handle, keyPriv);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Failed to create asymmetric key! Details: {Message}", e.Message);
+            return null;
+        }
     }
     
     public void Dispose()
