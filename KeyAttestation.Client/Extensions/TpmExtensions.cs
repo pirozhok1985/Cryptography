@@ -12,7 +12,7 @@ public static class TpmExtensions
         var rawRsa = new RawRsaCustom();
         rawRsa.Init(key.Public!, key.Private!);
         return new AsymmetricCipherKeyPair(
-            new RsaKeyParameters(true, rawRsa.N.ToBigIntegerBc(), rawRsa.D.ToBigIntegerBc()),
-            new RsaKeyParameters(false, rawRsa.N.ToBigIntegerBc(), rawRsa.E.ToBigIntegerBc()));
+            new RsaKeyParameters(false, rawRsa.N.ToBigIntegerBc(), rawRsa.E.ToBigIntegerBc()),
+            new RsaKeyParameters(true, rawRsa.N.ToBigIntegerBc(), rawRsa.D.ToBigIntegerBc()));
     }
 }
