@@ -1,4 +1,4 @@
-namespace Attestation.Shared.Entities;
+namespace KeyAttestation.Server.Entities;
 
 public class AttestationResult
 {

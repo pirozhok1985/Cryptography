@@ -1,4 +1,6 @@
-namespace Attestation.Shared.Entities;
+using KeyAttestation.Client.Utils;
+
+namespace KeyAttestation.Client.Entities;
 
 public class Pksc10GenerationResult
 {

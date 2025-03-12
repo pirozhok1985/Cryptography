@@ -8,8 +8,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyAttestation.Tests", "Key
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyAttestation.Server", "KeyAttestation.Server\KeyAttestation.Server.csproj", "{39D11726-C190-4A8F-B975-079BB7B9BD8E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attestation.Shared", "Attestation.Shared\Attestation.Shared.csproj", "{4D2346EE-B574-4DF9-BFCF-3AB7DE98A507}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,9 +30,5 @@ Global
 		{39D11726-C190-4A8F-B975-079BB7B9BD8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39D11726-C190-4A8F-B975-079BB7B9BD8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39D11726-C190-4A8F-B975-079BB7B9BD8E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D2346EE-B574-4DF9-BFCF-3AB7DE98A507}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D2346EE-B574-4DF9-BFCF-3AB7DE98A507}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D2346EE-B574-4DF9-BFCF-3AB7DE98A507}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D2346EE-B574-4DF9-BFCF-3AB7DE98A507}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

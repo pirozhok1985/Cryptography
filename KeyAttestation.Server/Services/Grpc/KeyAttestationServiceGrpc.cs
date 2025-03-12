@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using Attestation.Shared.Entities;
 using Google.Protobuf;
 using Grpc.Core;
+using KeyAttestation.Server.Entities;
 using KeyAttestationV1;
 
 namespace KeyAttestation.Server.Services.Grpc;

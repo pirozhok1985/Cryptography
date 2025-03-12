@@ -1,9 +1,8 @@
 using System.IO.Abstractions;
-using Attestation.Shared;
-using Attestation.Shared.Entities;
+using KeyAttestation.Client.Entities;
+using KeyAttestation.Client.Extensions;
 using KeyAttestation.Client.Utils;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Crypto;
 using Tpm2Lib;
 
 namespace KeyAttestation.Client.Services;
@@ -35,24 +34,22 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
             clientTpmKey.Handle,
             aik.Handle,
             [],
-            new SchemeRsassa(aik.Public!.nameAlg),
+            new SchemeRsassa((TpmAlgId)aik.Public!.nameAlg),
             out var signature);
 
-        var clientRsaKeyPair = new AsymmetricCipherKeyPair(
-            Helpers.ToAsymmetricKeyParameter(clientTpmKey, false),
-            Helpers.ToAsymmetricKeyParameter(clientTpmKey, true));
+        var clientRsaKeyPair = clientTpmKey.ToAsymmetricCipherKeyPair();
 
-        var cms = Pkcs10RequestGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey.Public!.GetTpmRepresentation(), aik);
+        var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey.Public!.GetTpmRepresentation(), aik);
         var csr = Pkcs10RequestGenerator.Generate(clientRsaKeyPair.Public, clientRsaKeyPair.Private, cms);
 
         if (saveAsPemEncodedFile)
         {
-            await Helpers.WriteCsrAsync(csr, fileName, _fileSystem.File, cancellationToken);
+            await csr.WriteCsrAsync(fileName, _fileSystem.File, cancellationToken);
         }
 
         return new Pksc10GenerationResult
         {
-            Csr = await Helpers.ConvertPkcs10RequestToPem(csr),
+            Csr = await csr.ConvertPkcs10RequestToPem(),
             Ek = ek,
             Aik = aik
         };

@@ -1,4 +1,4 @@
-namespace Attestation.Shared.Entities;
+namespace KeyAttestation.Client.Entities;
 
 public class CredentialActivationResult
 {

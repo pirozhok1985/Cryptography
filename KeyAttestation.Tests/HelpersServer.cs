@@ -1,11 +1,6 @@
-using Attestation.Shared;
-using Attestation.Shared.Entities;
-using Google.Protobuf;
+using KeyAttestation.Server.Entities;
 using KeyAttestation.Server.Services;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.OpenSsl;
-using Org.BouncyCastle.Pkcs;
-using Tpm2Lib;
 
 namespace KeyAttestation.Tests;
 

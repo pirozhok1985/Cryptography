@@ -1,4 +1,5 @@
-using Attestation.Shared.Entities;
+using KeyAttestation.Client.Entities;
+using KeyAttestation.Client.Utils;
 using Tpm2Lib;
 
 namespace KeyAttestation.Client.Services;

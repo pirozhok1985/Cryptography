@@ -1,4 +1,4 @@
-using Attestation.Shared.Entities;
+using KeyAttestation.Server.Entities;
 
 namespace KeyAttestation.Server.Services;
 

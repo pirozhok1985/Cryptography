@@ -1,7 +1,8 @@
 using System.Numerics;
+using KeyAttestation.Server.Utils;
 using Tpm2Lib;
 
-namespace Attestation.Shared.Entities;
+namespace KeyAttestation.Server.Entities;
 
 public class RawRsaCustom
 {
@@ -19,6 +20,6 @@ public class RawRsaCustom
         N = RawRsa.FromBigEndian((tpmPublic.unique as Tpm2bPublicKeyRsa)!.buffer);
         P = RawRsa.FromBigEndian(clPriv.buffer);
         Q = N / P;
-        D = Helpers.ModInverse(E, N - (P + Q - BigInteger.One));
+        D = Helper.ModInverse(E, N - (P + Q - BigInteger.One));
     }
 }

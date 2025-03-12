@@ -1,6 +1,7 @@
+using KeyAttestation.Client.Utils;
 using Tpm2Lib;
 
-namespace Attestation.Shared.Entities;
+namespace KeyAttestation.Client.Entities;
 
 public sealed class TpmFacade: IDisposable
 {
