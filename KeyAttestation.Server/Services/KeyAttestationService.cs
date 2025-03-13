@@ -32,8 +32,6 @@ public class KeyAttestationService : IKeyAttestationService
             return null;
         }
 
-        _logger.LogInformation("Attestation data has been successfully retrieved! Result: {@AttestData}!", attestationData);
-
         return attestationData;
     }
 
