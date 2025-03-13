@@ -130,7 +130,7 @@ public class KeyAttestationService : IKeyAttestationService
         }
 
         var sigHash = TpmHash.FromData(TpmAlgId.Sha256, data.Attestation.GetTpmRepresentation());
-        if (!data.AikTpmPublic!.VerifySignatureOverHash(sigHash, Marshaller.FromTpmRepresentation<SignatureRsassa>(data.Signature)))
+        if (!data.AikTpmPublic.VerifySignatureOverHash(sigHash, Marshaller.FromTpmRepresentation<SignatureRsassa>(data.Signature)))
         {
             logger.LogError("VerifyCertify failed! Signature is incorrect!");
             return false;
