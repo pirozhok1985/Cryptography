@@ -83,7 +83,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         };
     }
 
-    public CredentialActivationResult ActivateCredential(
+    public CredentialActivationResult? ActivateCredential(
         IdObject encryptedCredential,
         byte[] encryptedSecret,
         TpmKey ek,
@@ -101,7 +101,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         catch (Exception e)
         {
             _logger.LogError("Attestation statement activation failed! Details: {Message}", e.Message);
-            return CredentialActivationResult.Empty;
+            return null;
         }
     }
 

@@ -24,5 +24,5 @@ public interface IKeyAttestationService
     /// <param name="aik">Attestation identity key(TpmPublick)</param>
     /// <param name="cancellationToken">Task canceling support</param>
     /// <returns>CredentialActivationResult: byte[] ActivatedCredentials</returns>
-    public CredentialActivationResult ActivateCredential(IdObject encryptedCredential, byte[] encryptedSecret, TpmKey ek, TpmKey aik);
+    public CredentialActivationResult? ActivateCredential(IdObject encryptedCredential, byte[] encryptedSecret, TpmKey ek, TpmKey aik);
 }

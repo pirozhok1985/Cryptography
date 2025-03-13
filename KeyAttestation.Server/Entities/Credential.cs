@@ -14,4 +14,9 @@ public class Credential
       ClearSecret = clearSecret;
       IntegrityHmac = integrityHmac;
    }
+
+   public override string ToString()
+   {
+      return $"Credential:\n\tEncryptedIdentity = {Convert.ToBase64String(EncryptedIdentity)}\n\tIntegrityHmac = {Convert.ToBase64String(IntegrityHmac)}\n\tEncryptedSecret = {Convert.ToBase64String(EncryptedSecret)}\n\tClearSecret = {Convert.ToBase64String(ClearSecret)}";
+   }
 }

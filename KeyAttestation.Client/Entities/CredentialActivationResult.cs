@@ -2,17 +2,15 @@ namespace KeyAttestation.Client.Entities;
 
 public class CredentialActivationResult
 {
-    public byte[]? ActivatedCredentials { get; init; }
+    public byte[] ActivatedCredentials { get; init; }
     
-    public CredentialActivationResult(byte[]? activatedCredentials)
+    public CredentialActivationResult(byte[] activatedCredentials)
     {
         ActivatedCredentials = activatedCredentials;
     }
 
-    private CredentialActivationResult()
+    public override string ToString()
     {
-        
+        return $"Credential activation result: Activated credentials: {Convert.ToBase64String(ActivatedCredentials)}";
     }
-    
-    public static CredentialActivationResult Empty => new () ;
 }

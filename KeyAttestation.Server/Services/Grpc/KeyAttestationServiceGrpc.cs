@@ -51,7 +51,7 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
         
         // Should be a request to CA in order to get certificate
         
-        _logger.LogInformation("Processing Attestation request finished! Result: {@AttestResult}", attestResult);
+        _logger.LogInformation("Processing Attestation request finished!");
         return await Task.FromResult(new AttestationResponse
         {
             IsAttested = attestResult.Result,

@@ -58,7 +58,7 @@ var activatedCred = keyAttestationService.ActivateCredential(
     result.Ek,
     result.Aik!);
 
-if (activatedCred.ActivatedCredentials == null)
+if (activatedCred is null)
 {
     logger.LogError("Credential activation failed!");
     return;

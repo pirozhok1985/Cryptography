@@ -21,4 +21,9 @@ public class AttestationData
         AikTpmPublic = aikTpmPublic ?? throw new ArgumentNullException(nameof(aikTpmPublic));
         ClientTpmPublic = clientTpmPublic ?? throw new ArgumentNullException(nameof(clientTpmPublic));
     }
+
+    public override string ToString()
+    {
+        return $"AttestationData:\n\tAttestation = {Attestation}\n\tSignature = {Convert.ToBase64String(Signature)}\n\tAikTpmPublic = {AikTpmPublic}\n\tClientTpmPublic = {ClientTpmPublic}";
+    }
 }
