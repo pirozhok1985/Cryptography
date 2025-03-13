@@ -14,40 +14,63 @@ public class KeyAttestationService : IKeyAttestationService
     {
         _logger = logger;
     }
-    public AttestationData GetAttestationDataAsync(string csr)
+    public AttestationData? GetAttestationData(string csr)
     {
         _logger.LogInformation("Constructing Pkcs10CertificationRequest from csr: {@Csr}", csr);
         var certificationRequest = Helper.FromPemCsr(csr, _logger);
         if (certificationRequest is null)
         {
-            return AttestationData.Empty;
+            return null;
         }
         _logger.LogInformation("CertificationRequest has been successfully constructed! Result: {@Request}", certificationRequest);
 
         _logger.LogInformation("Retrieving attestation data!");
         var attestationData = GetAttestationRequest(certificationRequest, _logger);
+        if (attestationData is null)
+        {
+            _logger.LogError("Attestation data retrieval failed!");
+            return null;
+        }
+
         _logger.LogInformation("Attestation data has been successfully retrieved! Result: {@AttestData}!", attestationData);
 
         return attestationData;
     }
 
-    public Credential MakeCredentialsAsync(AttestationData data, byte[] ekPub)
+    public Credential? MakeCredential(AttestationData data, byte[] ekPub)
     {
-        var ekTpmPub = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
+        TpmPublic? ekTpmPub;
+        try
+        {
+            ekTpmPub = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Failed to create TpmPublic! Details: {Message}", e.Message);
+            return null;
+        }
         
         // Something that RA should take into account in order to compare with agent`s make_credential response
         var secret = Environment.MachineName.Select(Convert.ToByte).ToArray();
         
-        var idObject = ekTpmPub.CreateActivationCredentials(secret, data.AikTpmPublic!.GetName(), out var encSecret);
-        _logger.LogInformation("Encrypted credential has successfully been created! Cred: {@Cred}.", idObject);
-        return new Credential(
-            idObject.encIdentity,
-            encSecret,
-            secret,
-            idObject.integrityHMAC);
+        try
+        {
+            var idObject = ekTpmPub.CreateActivationCredentials(secret, data.AikTpmPublic!.GetName(), out var encSecret);
+            _logger.LogInformation("Encrypted credential has successfully been created! Cred: {@Cred}.", idObject);
+            return new Credential(
+                idObject.encIdentity,
+                encSecret,
+                secret,
+                idObject.integrityHMAC);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Failed to create credential! Details: {Message}", e.Message);
+            return null;
+        }
     }
 
-    public AttestationResult AttestAsync(AttestationData data)
+    public AttestationResult Attest(AttestationData data)
     {
         if (!VerifyCertify(data, _logger))
         {
@@ -68,7 +91,15 @@ public class KeyAttestationService : IKeyAttestationService
 
     public bool CheckActivatedCredentials(byte[] clientCredentials, byte[] serverCredentials)
     {
-       return Globs.ArraysAreEqual(clientCredentials, serverCredentials);
+        try
+        {
+            return Globs.ArraysAreEqual(clientCredentials, serverCredentials);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Equality check error! Details: {Message}", e.Message);
+            return false;
+        }
     }
     
     private static bool VerifyCertify(AttestationData data, ILogger logger)
@@ -108,16 +139,36 @@ public class KeyAttestationService : IKeyAttestationService
         return true;
     }
 
-    private static AttestationData GetAttestationRequest(Pkcs10CertificationRequest request, ILogger logger)
+    private static AttestationData? GetAttestationRequest(Pkcs10CertificationRequest request, ILogger logger)
     {
-        var attestationStatement = request.GetSignedData();
+        var attestationStatement = request.GetSignedData(logger);
+        if (attestationStatement is null)
+        {
+            return null;
+        }
+
         logger.LogInformation("Successfully retrieved Signed data from Pkcs10CertificationRequest: SignedData: {@Data}", attestationStatement);
-        var attest = attestationStatement.GetAttestData();
+        var attest = attestationStatement.GetAttestData(logger);
+        if (attest is null)
+        {
+            return null;
+        }
+
         logger.LogInformation("Successfully retrieved Attestation data from Signed data: AttestData: {@Attest}", attest);
-        var signature = attestationStatement.GetAttestSignature();
+        var signature = attestationStatement.GetAttestSignature(logger);
+        if (signature.Length == 0)
+        {
+            return null;
+        }
+
         logger.LogInformation("Successfully retrieved signature from Signed data: Signature: {Sig}", signature);
-        var keys = attestationStatement.GetSignedDataKeys();
-        logger.LogInformation("Successfully retrieved aik and client keys from Signed data: Aik:{@Aik}, ClientKey:{@Client}", keys.Aik, keys.Client);
-        return new AttestationData(attest, signature, keys.Aik, keys.Client);
+        var keys = attestationStatement.GetSignedDataKeys(logger);
+        if (keys is null)
+        {
+            return null;
+        }
+
+        logger.LogInformation("Successfully retrieved aik and client keys from Signed data: Aik:{@Aik}, ClientKey:{@Client}", keys.Value.Aik, keys.Value.Client);
+        return new AttestationData(attest, signature, keys.Value.Aik, keys.Value.Client);
     }
 }

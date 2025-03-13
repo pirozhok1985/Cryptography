@@ -46,7 +46,7 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
         _logger.LogInformation("Activated credential has successfully been checked!");
         
         _logger.LogInformation("Start attesting certified data!");
-        var attestResult = _keyAttestationService.AttestAsync(candidate.Data);
+        var attestResult = _keyAttestationService.Attest(candidate.Data);
         _logger.LogInformation("Attesting certified data finished! Data: {@AttestedData}", candidate.Data);
         
         // Should be a request to CA in order to get certificate
@@ -63,9 +63,20 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
     public override Task<ActivationResponse> MakeCredential(ActivationRequest request, ServerCallContext context)
     {
         _logger.LogInformation("Start processing MakeCredential request");
-        var attestData = _keyAttestationService.GetAttestationDataAsync(request.Csr);
+        var attestData = _keyAttestationService.GetAttestationData(request.Csr);
+        if (attestData is null)
+        {
+            return Task.FromResult(new ActivationResponse());
+        }
+        
         attestData.Csr = request.Csr;
-        var cred = _keyAttestationService.MakeCredentialsAsync(attestData, request.EkPub.ToByteArray());
+        
+        var cred = _keyAttestationService.MakeCredential(attestData, request.EkPub.ToByteArray());
+        if (cred is null)
+        {
+            return Task.FromResult(new ActivationResponse());
+        }
+
         _logger.LogInformation("Making credential successfully finished! Result: {@Credential}", cred);
         var activationResponse = new ActivationResponse
         {

@@ -4,28 +4,21 @@ namespace KeyAttestation.Server.Entities;
 
 public class AttestationData
 {
-    public Attest? Attestation { get; init; }
+    public Attest Attestation { get; init; }
     
-    public byte[]? Signature { get; init; }
+    public byte[] Signature { get; init; }
     
-    public TpmPublic? AikTpmPublic { get; init; }
+    public TpmPublic AikTpmPublic { get; init; }
     
-    public TpmPublic? ClientTpmPublic { get; init; }
+    public TpmPublic ClientTpmPublic { get; init; }
     
     public string? Csr { get; set; }
 
     public AttestationData(Attest? attestation, byte[] signature, TpmPublic? aikTpmPublic, TpmPublic? clientTpmPublic)
     {
-        Attestation = attestation;
+        Attestation = attestation ?? throw new ArgumentNullException(nameof(attestation));
         Signature = signature;
-        AikTpmPublic = aikTpmPublic;
-        ClientTpmPublic = clientTpmPublic;
+        AikTpmPublic = aikTpmPublic ?? throw new ArgumentNullException(nameof(aikTpmPublic));
+        ClientTpmPublic = clientTpmPublic ?? throw new ArgumentNullException(nameof(clientTpmPublic));
     }
-
-    private AttestationData()
-    {
-        
-    }
-
-    public static AttestationData Empty => new AttestationData();
 }

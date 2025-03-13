@@ -9,7 +9,7 @@ public interface IKeyAttestationService
     /// </summary>
     /// <param name="csr">Pem encoded certificate signing request</param>
     /// <returns>AttestationData: Attest? Attestation, byte[]? Signature, TpmPublic? AikTpmPublic, TpmPublic? ClientTpmPublic, string? Csr</returns>
-    public AttestationData GetAttestationDataAsync(string csr);
+    public AttestationData? GetAttestationData(string csr);
 
     /// <summary>
     /// Make credential as a part of credential activation process(without tpm)
@@ -17,14 +17,14 @@ public interface IKeyAttestationService
     /// <param name="data">Attestation data to process</param>
     /// <param name="ekPub">Public portion of Endorsement key</param>
     /// <returns>Credential: byte[] EncryptedIdentity, byte[] IntegrityHmac, byte[] EncryptedSecret, byte[] clearSecret, byte[] integrityHmac</returns>
-    public Credential MakeCredentialsAsync(AttestationData data, byte[] ekPub);
+    public Credential? MakeCredential(AttestationData data, byte[] ekPub);
 
     /// <summary>
     /// Attestation statement validation
     /// </summary>
     /// <param name="data">Attestation data to process</param>
     /// <returns>AttestationResult: bool Result, string? Message</returns>
-    public AttestationResult AttestAsync(AttestationData data);
+    public AttestationResult? Attest(AttestationData data);
 
     /// <summary>
     /// Check whether received credential is equal to created one

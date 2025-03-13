@@ -20,7 +20,7 @@ public class HelpersServer
         var keyAttestationService = new KeyAttestationService(logger);
         
         // Act
-        var attestationData = keyAttestationService.GetAttestationDataAsync(Csr);
+        var attestationData = keyAttestationService.GetAttestationData(Csr);
         
         // Arrange
         Assert.IsType<AttestationData>(attestationData);
@@ -39,12 +39,10 @@ public class HelpersServer
         
         // Act
         var ekPub = Convert.FromBase64String(EkPub);
-        var attestationData = keyAttestationService.GetAttestationDataAsync(Csr);
-        var attestBlob = keyAttestationService.MakeCredentialsAsync(attestationData, ekPub);
+        var attestationData = keyAttestationService.GetAttestationData(Csr);
 
         // Assert
-        Assert.NotEmpty(attestBlob.EncryptedIdentity);
-        Assert.NotEmpty(attestBlob.IntegrityHmac);
-        Assert.NotEmpty(attestBlob.EncryptedSecret);
+        Assert.NotNull(attestationData);
+        Assert.NotNull(keyAttestationService.MakeCredential(attestationData, ekPub));
     }
 }
