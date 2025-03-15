@@ -4,9 +4,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pkcs10RequestGenerator", "P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyAttestation.Client", "KeyAttestation.Client\KeyAttestation.Client.csproj", "{AB810AC8-1EF3-449E-89F4-69B4D3A44F23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyAttestation.Tests", "KeyAttestation.Tests\KeyAttestation.Tests.csproj", "{9D413EE7-51BA-415C-AF99-63A88E30F1F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyAttestation.Tests.Client", "KeyAttestation.Tests.Client\KeyAttestation.Tests.Client.csproj", "{9D413EE7-51BA-415C-AF99-63A88E30F1F9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyAttestation.Server", "KeyAttestation.Server\KeyAttestation.Server.csproj", "{39D11726-C190-4A8F-B975-079BB7B9BD8E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyAttestation.Tests.Server", "KeyAttestation.Tests.Server\KeyAttestation.Tests.Server.csproj", "{61C10A20-04C4-4BFA-B695-13951DA07DB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +32,9 @@ Global
 		{39D11726-C190-4A8F-B975-079BB7B9BD8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39D11726-C190-4A8F-B975-079BB7B9BD8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39D11726-C190-4A8F-B975-079BB7B9BD8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61C10A20-04C4-4BFA-B695-13951DA07DB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61C10A20-04C4-4BFA-B695-13951DA07DB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61C10A20-04C4-4BFA-B695-13951DA07DB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61C10A20-04C4-4BFA-B695-13951DA07DB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

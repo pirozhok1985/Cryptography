@@ -1,10 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System.IO.Abstractions;
-using System.Net.Security;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using Google.Protobuf;
-using Grpc.Net.Client;
+using KeyAttestation.Client.Factories;
 using KeyAttestationV1;
 using Microsoft.Extensions.Logging;
 using Tpm2Lib;
@@ -12,24 +9,12 @@ using KeyAttestationService = KeyAttestation.Client.Services.KeyAttestationServi
 
 var fileSystem = new FileSystem();
 var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<KeyAttestationService>();
-using var channel = GrpcChannel.ForAddress("https://localhost:8085", new GrpcChannelOptions()
-{
-    HttpHandler = new SocketsHttpHandler()
-    {
-        SslOptions = new SslClientAuthenticationOptions
-        {
-            CertificateRevocationCheckMode = X509RevocationMode.NoCheck,
-            EnabledSslProtocols = SslProtocols.Tls12,
-            EncryptionPolicy = EncryptionPolicy.RequireEncryption,
-            RemoteCertificateValidationCallback = (_, _, _, _) => true,
-        }
-    }
-});
-var client = new KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient(channel);
+using var factory = new KeyAttestationGrpcClientFactory("http://localhost:8080");
+var client = factory.CreateClient();
 
-using var keyAttestationService = new KeyAttestationService(fileSystem, logger, client);
+using var keyAttestationService = new KeyAttestationService(fileSystem, logger, client, "/dev/tpmrm0");
 
-logger.LogInformation("Start generating PKCS10 certificate signinig request");
+logger.LogInformation("Start generating PKCS10 certificate signing request");
 var result = await keyAttestationService.GeneratePkcs10CertificationRequest(true,
     "/home/sigma.sbrf.ru@18497320/temp/openssl_test/client.csr");
 if (result.Ek == null || result.Aik == null || result.Csr == null)

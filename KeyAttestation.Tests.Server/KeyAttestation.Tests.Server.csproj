@@ -12,8 +12,6 @@
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.0"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
-        <PackageReference Include="Shouldly" Version="4.3.0" />
-        <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.0.11" />
         <PackageReference Include="xunit" Version="2.5.3"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3"/>
     </ItemGroup>
@@ -23,7 +21,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\KeyAttestation.Client\KeyAttestation.Client.csproj" />
       <ProjectReference Include="..\KeyAttestation.Server\KeyAttestation.Server.csproj" />
     </ItemGroup>
 

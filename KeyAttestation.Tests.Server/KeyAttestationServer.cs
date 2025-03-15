@@ -1,14 +1,10 @@
-using KeyAttestation.Server.Entities;
-using KeyAttestation.Server.Services;
-using Microsoft.Extensions.Logging;
+namespace KeyAttestation.Tests.Server;
 
-namespace KeyAttestation.Tests;
-
-public class KeyAttestationServiceServer : IClassFixture<KeyAttestationServiceServerFixture>
+public class KeyAttestationServer : IClassFixture<KeyAttestationServiceServerFixture>
 {
     private readonly KeyAttestationServiceServerFixture _keyAttestationServiceServerFixture;
 
-    public KeyAttestationServiceServer(KeyAttestationServiceServerFixture keyAttestationServiceServerFixture)
+    public KeyAttestationServer(KeyAttestationServiceServerFixture keyAttestationServiceServerFixture)
     {
         _keyAttestationServiceServerFixture = keyAttestationServiceServerFixture;
     }

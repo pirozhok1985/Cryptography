@@ -16,13 +16,17 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
     private readonly TpmFacade? _tpmFacade;
     private bool _disposed;
 
-    public KeyAttestationService(IFileSystem fileSystem, ILogger<KeyAttestationService> logger, KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient client)
+    public KeyAttestationService(
+        IFileSystem fileSystem,
+        ILogger<KeyAttestationService> logger,
+        KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient client,
+        string deviceName)
     {
         _fileSystem = fileSystem;
         _logger = logger;
         _client = client;
         _tpmFacade = new TpmFacade(logger);
-        _tpmFacade.InitialiseTpm("/dev/tpmrm0");
+        _tpmFacade.InitialiseTpm(deviceName);
     }
     
     public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(bool saveAsPemEncodedFile, string? fileName = null)
@@ -53,19 +57,19 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         try
         {
             attestation = _tpmFacade.Tpm!.Certify(
-                clientTpmKey?.Handle,
-                aik?.Handle,
+                clientTpmKey.Handle,
+                aik.Handle,
                 [],
-                new SchemeRsassa(aik!.Public!.nameAlg),
+                new SchemeRsassa(aik.Public!.nameAlg),
                 out signature);
         }
         catch (Exception e)
         {
-            _logger.LogError("Attestation statement generation failed! Details: {Messgage}", e.Message);
+            _logger.LogError("Attestation statement generation failed! Details: {Message}", e.Message);
             return Pksc10GenerationResult.Empty;
         }
 
-        var clientRsaKeyPair = clientTpmKey!.ToAsymmetricCipherKeyPair();
+        var clientRsaKeyPair = clientTpmKey.ToAsymmetricCipherKeyPair();
 
         var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey!.Public!.GetTpmRepresentation(), aik);
         var csr = Pkcs10RequestGenerator.Generate(clientRsaKeyPair.Public, clientRsaKeyPair.Private, cms);

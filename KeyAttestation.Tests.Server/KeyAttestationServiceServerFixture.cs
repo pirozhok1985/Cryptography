@@ -1,7 +1,7 @@
 using KeyAttestation.Server.Services;
 using Microsoft.Extensions.Logging;
 
-namespace KeyAttestation.Tests;
+namespace KeyAttestation.Tests.Server;
 
 public class KeyAttestationServiceServerFixture
 {

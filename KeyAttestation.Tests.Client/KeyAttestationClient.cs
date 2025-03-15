@@ -4,9 +4,9 @@ using KeyAttestation.Client.Utils;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 
-namespace KeyAttestation.Tests;
+namespace KeyAttestation.Tests.Client;
 
-public class HelpersClient
+public class KeyAttestationClient
 {
     private const string Csr =
         "-----BEGIN CERTIFICATE REQUEST-----\nMIICgTCCAWkCAQAwPDENMAsGA1UEAwwEdGVzdDEUMBIGCgmSJomT8ixkARkWBHRl\nc3QxFTATBgoJkiaJk/IsZAEZFgVsb2NhbDCCASIwDQYJKoZIhvcNAQEBBQADggEP\nADCCAQoCggEBAMDOT5B0q6XLaQkXV1Ryt22TM2lM+RnVXkqzzO3BZiHIwSWa/FCc\nCTbicVB6WDAVAH/8wk7INkxvjLT9U7NAtrdVjOcJsa1T71WNwYQLprTB0uvWFwiv\nhAUnr4DdortYsKC62y1wXEygJ9ymO93uYwN9VWz7JUwGJvXLWehpls6p/IfHcKbb\nyhW8xGhCKb0WWjlkdu6nCA62h+cnH84T/4unoLfvs0BrpreS4MzFxcN8ivvGaAYA\nhy/8gXp+Vje5yIEpQUqDHeYorzZfq/IUiWm82qaELF3XN4fEsG5ZJGajCrOJVpsd\npgXxGDI6X8i+eWkpuyB85fLPsybxhfV1VhUCAwEAAaAAMA0GCSqGSIb3DQEBCwUA\nA4IBAQAiVE18IbwIpo/4MAAVN+1ZXNUxNEuV1bF/jrm67PAoOaNIBK3b2Isj2n+x\nTHG2xMLFBku5usgFG135lWgTHqznVgyYPaDPwDq3kbHkRv3+R2loPI1DTm7dxqbZ\nWOh9w8QwbLZm74zuqn4V80EM4vCXR2oLahhebmhCmqy8DGMw+NXm1xqBsttEDbda\nPf2acgib/VQ6XLgCcOYFZ8oW7i9GMm7gxEt9HjgFqUeKfLGoYRQF32BptFjKVmqn\nohG62kH1SdaWIAeB3qehGgG/YsnrRI3NtM7j1nDV/r12132VDi3DXkZDeKOofVUO\narAQnYyOiQ41ye3/FsHWosDiPpUr\n-----END CERTIFICATE REQUEST-----";
