@@ -4,13 +4,13 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyAttestation.Tests;
 
-public class KeyAttestationServiceServer : IClassFixture<HelperServerFixture>
+public class KeyAttestationServiceServer : IClassFixture<KeyAttestationServiceServerFixture>
 {
-    private readonly HelperServerFixture _helperServerFixture;
+    private readonly KeyAttestationServiceServerFixture _keyAttestationServiceServerFixture;
 
-    public KeyAttestationServiceServer(HelperServerFixture helperServerFixture)
+    public KeyAttestationServiceServer(KeyAttestationServiceServerFixture keyAttestationServiceServerFixture)
     {
-        _helperServerFixture = helperServerFixture;
+        _keyAttestationServiceServerFixture = keyAttestationServiceServerFixture;
     }
 
     private const string ForgedCsr =
@@ -29,7 +29,7 @@ public class KeyAttestationServiceServer : IClassFixture<HelperServerFixture>
     public void ShouldGenerateAttestationData_IfCsrIsCorrect()
     {
         // Arrange
-        var keyAttestationService = _helperServerFixture.KeyAttestationService;
+        var keyAttestationService = _keyAttestationServiceServerFixture.KeyAttestationService;
         
         // Act
         var attestationDataCorrect = keyAttestationService.GetAttestationData(ValidCsr);
@@ -44,7 +44,7 @@ public class KeyAttestationServiceServer : IClassFixture<HelperServerFixture>
     public void ShouldGenerateCredential_IfAttestationDataIsNotNull_And_EkPubIsCorrect()
     {
         // Arrange
-        var keyAttestationService = _helperServerFixture.KeyAttestationService;
+        var keyAttestationService = _keyAttestationServiceServerFixture.KeyAttestationService;
         var ekPubCorrect = Convert.FromBase64String(EkPubCorrect);
         var ekPubIncorrect = Convert.FromBase64String(EkPubIncorrect);
         
@@ -62,7 +62,7 @@ public class KeyAttestationServiceServer : IClassFixture<HelperServerFixture>
     public void ShouldVerifyAttestData_IfCsrIsCorrect()
     {
         // Arrange
-        var keyAttestationService = _helperServerFixture.KeyAttestationService;
+        var keyAttestationService = _keyAttestationServiceServerFixture.KeyAttestationService;
         
         // Act
         var attestationDataWithInValidCsr = keyAttestationService.GetAttestationData(ForgedCsr);
