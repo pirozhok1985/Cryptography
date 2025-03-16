@@ -1,60 +1,37 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using System.IO.Abstractions;
-using Google.Protobuf;
-using KeyAttestation.Client.Factories;
-using KeyAttestationV1;
-using Microsoft.Extensions.Logging;
-using Tpm2Lib;
-using KeyAttestationService = KeyAttestation.Client.Services.KeyAttestationService;
 
-var fileSystem = new FileSystem();
-var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<KeyAttestationService>();
-using var factory = new KeyAttestationGrpcClientFactory("http://localhost:8080");
-var client = factory.CreateClient();
+using System.CommandLine;
+using KeyAttestation.Client;
 
-using var keyAttestationService = new KeyAttestationService(fileSystem, logger, client, "/dev/tpmrm0");
-
-logger.LogInformation("Start generating PKCS10 certificate signing request");
-var result = await keyAttestationService.GeneratePkcs10CertificationRequest(true,
-    "/home/sigma.sbrf.ru@18497320/temp/openssl_test/client.csr");
-if (result.Ek == null || result.Aik == null || result.Csr == null)
+var tpmDeviceNameOption = new Option<string>("--tpmDevice")
 {
-    logger.LogError("Pkcs10 certificate signing request generation failed!");
-    return;
-}
+    Description = "Tpm device to use.",
+    Arity = ArgumentArity.ExactlyOne,
+    IsRequired = true
+};
 
-logger.LogInformation("Successfully generated PKCS10 certificate request and saved it on file system!");
-
-logger.LogInformation("Sending Activation Request!");
-var makeCredResponse = await client.MakeCredentialAsync(new ActivationRequest
+var csrFilePathOption = new Option<string>("--csrFilePath")
 {
-    Csr = result.Csr,
-    EkPub = ByteString.CopyFrom(result.Ek!.Public)
-});
-logger.LogInformation(
-    "Received Activation Response! Result: {@Content}", makeCredResponse);
+    Description = "Path to save CSR file.",
+    Arity = ArgumentArity.ExactlyOne,
+    IsRequired = false
+};
 
-var cred = new IdObject(makeCredResponse.IntegrityHmac.ToByteArray(), makeCredResponse.EncryptedIdentity.ToByteArray());
-
-logger.LogInformation("Start credential activation!");
-var activatedCred = keyAttestationService.ActivateCredential(
-    cred,
-    makeCredResponse.EncryptedSecret.ToByteArray(),
-    result.Ek,
-    result.Aik!);
-
-if (activatedCred is null)
+var endpointOption = new Option<string>("--endpoint")
 {
-    logger.LogError("Credential activation failed!");
-    return;
-}
+    Description = "Grpc endpoint to connect to.",
+    Arity = ArgumentArity.ExactlyOne,
+    IsRequired = true
+};
 
-logger.LogInformation("Activation credential successfully finished! Result: {@Content}", activatedCred);
+var rootCommand = new RootCommand("PoC KeyAttestationClient");
+rootCommand.AddOption(tpmDeviceNameOption);
+rootCommand.AddOption(csrFilePathOption);
+rootCommand.AddOption(endpointOption);
 
-logger.LogInformation("Sending attestation request!");
-var attestResponse = await client.AttestAsync(new AttestationRequest
+rootCommand.SetHandler(async (tpmDevice, csrFilePath, endPoint) =>
 {
-    DecryptedCredentials = ByteString.CopyFrom(activatedCred.ActivatedCredentials),
-    CorrelationId = makeCredResponse.CorrelationId
-});
-logger.LogInformation("Received Attestation Response! Result: {@Content}", attestResponse);
+    await Worker.DoWork(tpmDevice, csrFilePath, endPoint);
+}, tpmDeviceNameOption, csrFilePathOption, endpointOption);
+
+await rootCommand.InvokeAsync(args);

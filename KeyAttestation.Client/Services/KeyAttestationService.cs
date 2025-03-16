@@ -29,7 +29,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         _tpmFacade.InitialiseTpm(deviceName);
     }
     
-    public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(bool saveAsPemEncodedFile, string? fileName = null)
+    public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(string? fileName = null)
     {
         var ek = _tpmFacade!.CreateEk();
         if (ek == null)
@@ -74,7 +74,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey!.Public!.GetTpmRepresentation(), aik);
         var csr = Pkcs10RequestGenerator.Generate(clientRsaKeyPair.Public, clientRsaKeyPair.Private, cms);
 
-        if (saveAsPemEncodedFile)
+        if (!string.IsNullOrEmpty(fileName))
         {
             await csr.WriteCsrAsync(fileName, _fileSystem.File);
         }

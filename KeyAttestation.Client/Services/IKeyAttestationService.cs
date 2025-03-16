@@ -13,7 +13,7 @@ public interface IKeyAttestationService
     /// <param name="fileName">The name of the file to be saved</param>
     /// <param name="cancellationToken">Task canceling support</param>
     /// <returns>Pkcs10GenerationResult:string? Csr, TpmKey? Ek, TpmKey? Aik</returns>
-    public Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(bool saveAsPemEncodedFile, string? fileName);
+    public Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(string? fileName);
     
     /// <summary>
     /// Credential activation interface
