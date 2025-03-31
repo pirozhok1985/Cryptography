@@ -1,5 +1,7 @@
 ﻿using System.IO.Abstractions;
 using Google.Protobuf;
+using KeyAttestation.Client.Abstractions;
+using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Factories;
 using KeyAttestationV1;
 using Microsoft.Extensions.Logging;
@@ -16,8 +18,9 @@ public static class Worker
         var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<KeyAttestationService>();
         using var factory = new KeyAttestationGrpcClientFactory(endPoint);
         var client = factory.CreateClient();
+        var tpmFacade = CreateTpm2Facade(tpmDevice, logger);
 
-        using var keyAttestationService = new KeyAttestationService(fileSystem, logger, client, tpmDevice);
+        using var keyAttestationService = new KeyAttestationService(fileSystem, logger, client, tpmFacade);
 
         logger.LogInformation("Start generating PKCS10 certificate signing request");
         var result = await keyAttestationService.GeneratePkcs10CertificationRequest(csrFilePath);
@@ -64,4 +67,22 @@ public static class Worker
         });
         logger.LogInformation("Received Attestation Response! Result: {@Content}", attestResponse);
     }
+
+    private static ITpm2Facade CreateTpm2Facade(string deviceName, ILogger logger)
+        => deviceName switch
+        {
+            "simulator" => new Tpm2Facade<TcpTpmDevice>(logger, new Tpm2DeviceCreationProperties()
+            {
+                ServerName = "localhost",
+                ServerPort = 2322
+            }),
+
+            "linux" => new Tpm2Facade<LinuxTpmDevice>(logger, new Tpm2DeviceCreationProperties()
+            {
+                DeviceName = "/dev/tpmrm0"
+            }),
+
+            "windows" => new Tpm2Facade<TbsDevice>(logger, new Tpm2DeviceCreationProperties()),
+            _ => throw new ArgumentOutOfRangeException(nameof(deviceName), deviceName, "Unrecognized device type")
+        };
 }

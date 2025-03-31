@@ -1,12 +1,15 @@
-using KeyAttestation.Client.Utils;
+using KeyAttestation.Client.Abstractions;
+using KeyAttestation.Client.Entities;
+using KeyAttestation.Client.Factories;
 using Microsoft.Extensions.Logging;
 using Tpm2Lib;
 
-namespace KeyAttestation.Client.Entities;
+namespace KeyAttestation.Client;
 
-public sealed class TpmFacade: IDisposable
+public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
 {
     private readonly ILogger _logger;
+    private readonly Tpm2DeviceCreationProperties _properties;
 
     enum KeyType
     {
@@ -14,31 +17,36 @@ public sealed class TpmFacade: IDisposable
         Ordinal
     }
     
-    public Tpm2? Tpm { get; private set; }
-    private LinuxTpmDevice? _tpmDevice;
+    public Tpm2? Tpm { get; init; }
+    private Tpm2Device? _tpmDevice;
     private bool _disposed;
 
-    public TpmFacade(ILogger logger)
+    public Tpm2Facade(
+        ILogger logger,
+        Tpm2DeviceCreationProperties properties)
     {
         _logger = logger;
+        _properties = properties;
+        InitialiseTpm();
     }
 
-    public void InitialiseTpm(string deviceName)
+    private Tpm2? InitialiseTpm()
     {
-        _tpmDevice = new LinuxTpmDevice(deviceName);
+        var factory = new Tpm2DeviceFactory<TTpm2Device>();
+        _tpmDevice = factory.CreateTpm2Device(_properties);
         try
         {
-            _tpmDevice.Connect();
-            Tpm = new Tpm2(_tpmDevice);
+            _tpmDevice?.Connect();
+            return new Tpm2(_tpmDevice);
         }
         catch (Exception e)
         {
             _logger.LogError("Failed to connect to TpmDevice! Details: {Message}", e.Message);
-            Dispose();
+            return null;
         }
     }
     
-    public TpmKey? CreateEk()
+    public Tpm2Key? CreateEk()
     {
         var ekAttributes = ObjectAttr.Restricted | ObjectAttr.Decrypt | ObjectAttr.FixedTPM | ObjectAttr.FixedParent |
                            ObjectAttr.UserWithAuth | ObjectAttr.SensitiveDataOrigin;
@@ -56,7 +64,7 @@ public sealed class TpmFacade: IDisposable
                 out _,
                 out _,
                 out _);
-            return new TpmKey(ekPublic, ekHandle);
+            return new Tpm2Key(ekPublic, ekHandle);
         }
         catch (Exception e)
         {
@@ -65,13 +73,13 @@ public sealed class TpmFacade: IDisposable
         }
     }
     
-    public TpmKey? CreateAk(TpmHandle parent)
-        => CreateKey(KeyType.Attestation, parent);
+    public Tpm2Key? CreateAk(TpmHandle parent)
+        => CreateRsaKey(KeyType.Attestation, parent);
     
-    public TpmKey? CreateKey(TpmHandle parent)
-        => CreateKey(KeyType.Ordinal, parent);
+    public Tpm2Key? CreateRsaKey(TpmHandle parent)
+        => CreateRsaKey(KeyType.Ordinal, parent);
 
-    private TpmKey? CreateKey(KeyType keyType, TpmHandle parent)
+    private Tpm2Key? CreateRsaKey(KeyType keyType, TpmHandle parent)
     {
         ObjectAttr typedAttributes = default;
         RsaParms? keyParams = null;
@@ -104,7 +112,7 @@ public sealed class TpmFacade: IDisposable
                 out _,
                 out _);
             var handle = Tpm.Load(parent, keyPriv, keyPub);
-            return new TpmKey(keyPub, handle, keyPriv);
+            return new Tpm2Key(keyPub, handle, keyPriv);
         }
         catch (Exception e)
         {

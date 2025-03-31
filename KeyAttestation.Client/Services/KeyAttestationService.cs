@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using KeyAttestation.Client.Abstractions;
 using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Extensions;
 using KeyAttestation.Client.Utils;
@@ -13,20 +14,19 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
     private readonly KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient _client;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger<KeyAttestationService> _logger;
-    private readonly TpmFacade? _tpmFacade;
+    private readonly ITpm2Facade _tpmFacade;
     private bool _disposed;
 
     public KeyAttestationService(
         IFileSystem fileSystem,
         ILogger<KeyAttestationService> logger,
         KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient client,
-        string deviceName)
+        ITpm2Facade tpmFacade)
     {
         _fileSystem = fileSystem;
         _logger = logger;
         _client = client;
-        _tpmFacade = new TpmFacade(logger);
-        _tpmFacade.InitialiseTpm(deviceName);
+        _tpmFacade = tpmFacade;
     }
     
     public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(string? fileName = null)
@@ -46,7 +46,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         // Parent key persistent handle
         var srkHandlePersistent = TpmHandle.Persistent(5);
         
-        var clientTpmKey = _tpmFacade.CreateKey(srkHandlePersistent);
+        var clientTpmKey = _tpmFacade.CreateRsaKey(srkHandlePersistent);
         if (clientTpmKey == null)
         {
             return Pksc10GenerationResult.Empty;
@@ -90,8 +90,8 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
     public CredentialActivationResult? ActivateCredential(
         IdObject encryptedCredential,
         byte[] encryptedSecret,
-        TpmKey ek,
-        TpmKey aik)
+        Tpm2Key ek,
+        Tpm2Key aik)
     {
         try
         {
@@ -115,7 +115,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         {
             return;
         }
-        _tpmFacade?.Dispose();
+        _tpmFacade.Dispose();
         _disposed = true;
     }
 }

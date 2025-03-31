@@ -5,7 +5,7 @@ using KeyAttestation.Client;
 
 var tpmDeviceNameOption = new Option<string>("--tpmDevice")
 {
-    Description = "Tpm device to use.",
+    Description = "Tpm device to use. Could be on of the following : simulator, linux, windows",
     Arity = ArgumentArity.ExactlyOne,
     IsRequired = true
 };

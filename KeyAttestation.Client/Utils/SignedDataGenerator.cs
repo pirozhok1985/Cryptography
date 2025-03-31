@@ -1,3 +1,4 @@
+using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Extensions;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
@@ -12,7 +13,7 @@ namespace KeyAttestation.Client.Utils;
 
 public static class SignedDataGenerator
 {
-    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, byte[] publicKey, TpmKey aik)
+    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, byte[] publicKey, Tpm2Key aik)
     {
         var aikKey = aik.ToAsymmetricCipherKeyPair();
         var subjectPubInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(aikKey.Public!);

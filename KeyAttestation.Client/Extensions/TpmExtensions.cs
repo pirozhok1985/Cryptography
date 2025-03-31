@@ -7,7 +7,7 @@ namespace KeyAttestation.Client.Extensions;
 
 public static class TpmExtensions
 {
-    public static AsymmetricCipherKeyPair ToAsymmetricCipherKeyPair(this TpmKey key)
+    public static AsymmetricCipherKeyPair ToAsymmetricCipherKeyPair(this Tpm2Key key)
     {
         var rawRsa = new RawRsaCustom();
         rawRsa.Init(key.Public!, key.Private!);
