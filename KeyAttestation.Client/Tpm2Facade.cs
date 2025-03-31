@@ -27,7 +27,7 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
     {
         _logger = logger;
         _properties = properties;
-        InitialiseTpm();
+        Tpm = InitialiseTpm();
     }
 
     private Tpm2? InitialiseTpm()
