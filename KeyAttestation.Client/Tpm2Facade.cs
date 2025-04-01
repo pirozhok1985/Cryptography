@@ -46,7 +46,7 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
         }
     }
     
-    public Tpm2Key? CreatePrimaryKey(TpmHandle hierarchy)
+    public Tpm2Key? CreateEk()
     {
         var ekAttributes = ObjectAttr.Restricted | ObjectAttr.Decrypt | ObjectAttr.FixedTPM | ObjectAttr.FixedParent |
                            ObjectAttr.UserWithAuth | ObjectAttr.SensitiveDataOrigin;
@@ -55,7 +55,7 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
         try
         {
             var ekHandle = Tpm!.CreatePrimary(
-                hierarchy,
+                TpmHandle.RhEndorsement, 
                 new SensitiveCreate(),
                 endorsementKeyTemplate,
                 null,

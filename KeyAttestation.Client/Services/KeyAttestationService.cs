@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.Runtime.InteropServices;
 using KeyAttestation.Client.Abstractions;
 using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Extensions;
@@ -32,7 +33,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
     
     public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(string? fileName = null)
     {
-        var ek = _tpmFacade.CreatePrimaryKey(TpmHandle.RhEndorsement);
+        var ek = _tpmFacade.CreateEk();
         if (ek == null)
         {
             return Pksc10GenerationResult.Empty;
@@ -45,15 +46,14 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         }
 
         // Parent key persistent handle
-        var srkHandle = TpmHandle.Persistent(5);
-        if (srkHandle.Name is null)
+        TpmHandle srkHandle;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            srkHandle = _tpmFacade.CreatePrimaryKey(TpmHandle.RhOwner)?.Handle;
+            srkHandle = TpmHandle.Persistent(5);
         }
-
-        if (srkHandle is null)
+        else
         {
-            return Pksc10GenerationResult.Empty;
+            srkHandle = ek.Handle!;
         }
 
         var clientTpmKey = _tpmFacade.CreateKey(srkHandle);

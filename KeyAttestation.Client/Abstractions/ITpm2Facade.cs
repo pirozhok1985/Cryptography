@@ -26,5 +26,5 @@ public interface ITpm2Facade : IDisposable
     /// Create Endorsement Key using default endorsement key template
     /// </summary>
     /// <returns>TpmKey: TpmPublic, TpmHandle</returns>
-    public Tpm2Key? CreatePrimaryKey(TpmHandle hierarchy);
+    public Tpm2Key? CreateEk();
 }
