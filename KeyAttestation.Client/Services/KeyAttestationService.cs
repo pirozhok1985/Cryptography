@@ -4,6 +4,7 @@ using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Extensions;
 using KeyAttestation.Client.Utils;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Utilities;
 using Tpm2Lib;
 using Exception = System.Exception;
 
@@ -31,7 +32,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
     
     public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(string? fileName = null)
     {
-        var ek = _tpmFacade!.CreateEk();
+        var ek = _tpmFacade.CreatePrimaryKey(TpmHandle.RhEndorsement);
         if (ek == null)
         {
             return Pksc10GenerationResult.Empty;
@@ -44,9 +45,18 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         }
 
         // Parent key persistent handle
-        var srkHandlePersistent = TpmHandle.Persistent(5);
-        
-        var clientTpmKey = _tpmFacade.CreateRsaKey(srkHandlePersistent);
+        var srkHandle = TpmHandle.Persistent(5);
+        if (srkHandle.Name is null)
+        {
+            srkHandle = _tpmFacade.CreatePrimaryKey(TpmHandle.RhOwner)?.Handle;
+        }
+
+        if (srkHandle is null)
+        {
+            return Pksc10GenerationResult.Empty;
+        }
+
+        var clientTpmKey = _tpmFacade.CreateKey(srkHandle);
         if (clientTpmKey == null)
         {
             return Pksc10GenerationResult.Empty;

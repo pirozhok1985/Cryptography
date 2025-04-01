@@ -13,7 +13,7 @@ public interface ITpm2Facade : IDisposable
     /// </summary>
     /// <param name="parent">Parent key handle</param>
     /// <returns>TpmKey: TpmPublic, TpmPrivate, TpmHandle</returns>
-    public Tpm2Key? CreateRsaKey(TpmHandle parent);
+    public Tpm2Key? CreateKey(TpmHandle parent);
     
     /// <summary>
     /// Create Authority Identity Key using default AIK template
@@ -26,5 +26,5 @@ public interface ITpm2Facade : IDisposable
     /// Create Endorsement Key using default endorsement key template
     /// </summary>
     /// <returns>TpmKey: TpmPublic, TpmHandle</returns>
-    public Tpm2Key? CreateEk();
+    public Tpm2Key? CreatePrimaryKey(TpmHandle hierarchy);
 }
