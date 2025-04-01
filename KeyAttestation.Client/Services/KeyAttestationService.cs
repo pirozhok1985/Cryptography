@@ -5,7 +5,6 @@ using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Extensions;
 using KeyAttestation.Client.Utils;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Utilities;
 using Tpm2Lib;
 using Exception = System.Exception;
 
@@ -13,7 +12,6 @@ namespace KeyAttestation.Client.Services;
 
 public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
 {
-    private readonly KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient _client;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger<KeyAttestationService> _logger;
     private readonly ITpm2Facade _tpmFacade;
@@ -22,12 +20,10 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
     public KeyAttestationService(
         IFileSystem fileSystem,
         ILogger<KeyAttestationService> logger,
-        KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient client,
         ITpm2Facade tpmFacade)
     {
         _fileSystem = fileSystem;
         _logger = logger;
-        _client = client;
         _tpmFacade = tpmFacade;
     }
     
@@ -81,7 +77,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
 
         var clientRsaKeyPair = clientTpmKey.ToAsymmetricCipherKeyPair();
 
-        var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey!.Public!.GetTpmRepresentation(), aik);
+        var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey.Public!.GetTpmRepresentation(), aik);
         var csr = Pkcs10RequestGenerator.Generate(clientRsaKeyPair.Public, clientRsaKeyPair.Private, cms);
 
         if (!string.IsNullOrEmpty(fileName))
@@ -105,7 +101,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
     {
         try
         {
-            var activatedCredential = _tpmFacade!.Tpm!.ActivateCredential(
+            var activatedCredential = _tpmFacade.Tpm!.ActivateCredential(
                 aik.Handle,
                 ek.Handle,
                 encryptedCredential,

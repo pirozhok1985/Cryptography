@@ -20,7 +20,7 @@ public static class Worker
         var client = factory.CreateClient();
         var tpmFacade = CreateTpm2Facade(tpmDevice, logger);
 
-        using var keyAttestationService = new KeyAttestationService(fileSystem, logger, client, tpmFacade);
+        using var keyAttestationService = new KeyAttestationService(fileSystem, logger, tpmFacade);
 
         logger.LogInformation("Start generating PKCS10 certificate signing request");
         var result = await keyAttestationService.GeneratePkcs10CertificationRequest(csrFilePath);
