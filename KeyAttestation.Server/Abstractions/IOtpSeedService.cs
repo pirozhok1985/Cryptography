@@ -1,7 +1,6 @@
-using KeyAttestation.Server.Entities;
 using Tpm2Lib;
 
-namespace KeyAttestation.Server.Services;
+namespace KeyAttestation.Server.Abstractions;
 
 public interface IOtpSeedService
 {

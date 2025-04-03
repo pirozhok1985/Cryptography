@@ -1,6 +1,6 @@
 using KeyAttestation.Server.Entities;
 
-namespace KeyAttestation.Server.Services;
+namespace KeyAttestation.Server.Abstractions;
 
 public interface IKeyAttestationService
 {

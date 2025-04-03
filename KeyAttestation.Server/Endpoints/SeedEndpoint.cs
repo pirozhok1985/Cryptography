@@ -1,26 +1,22 @@
 using System.Buffers;
+using KeyAttestation.Server.Abstractions;
 using KeyAttestation.Server.Services;
 using Tpm2Lib;
 
 namespace KeyAttestation.Server.Endpoints;
 
-public class SeedEndpoint
+public static class SeedEndpoint
 {
-    private readonly IOtpSeedService _otpSeedService;
-
-    public SeedEndpoint(IOtpSeedService otpSeedService)
+    public static async Task Endpoint(HttpContext context)
     {
-        _otpSeedService = otpSeedService;
-    }
-    public async Task Endpoint(HttpContext context)
-    {
+        var otpSeedService = context.RequestServices.GetRequiredService<IOtpSeedService>();
         var readResult = await context.Request.BodyReader.ReadAsync();
         var aik = readResult.Buffer.ToArray();
-        TpmPublic? ekPub = null; // Stub used to build project!! Does not work in prom environment!
-        var seed = await _otpSeedService.MakeSeedBasedCredential(aik, ekPub);
+        TpmPublic? ekPub = null;
+        var seed = await otpSeedService.MakeSeedBasedCredential(aik, ekPub);
         
         context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(seed);
+        await context.Response.WriteAsync(Convert.ToBase64String(seed));
         context.Response.StatusCode = 200;
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using Google.Protobuf;
 using Grpc.Core;
+using KeyAttestation.Server.Abstractions;
 using KeyAttestation.Server.Entities;
 using KeyAttestationV1;
 

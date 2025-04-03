@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using KeyAttestation.Server.Abstractions;
 using KeyAttestation.Server.Entities;
 using Tpm2Lib;
 
