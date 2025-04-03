@@ -71,7 +71,7 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
         
         attestData.Csr = request.Csr;
         
-        var cred = _keyAttestationService.MakeCredential(attestData, request.EkPub.ToByteArray());
+        var cred = _keyAttestationService.MakeCredential(attestData.AikTpmPublic.GetName(), request.EkPub.ToByteArray());
         if (cred is null)
         {
             return Task.FromResult(new ActivationResponse());

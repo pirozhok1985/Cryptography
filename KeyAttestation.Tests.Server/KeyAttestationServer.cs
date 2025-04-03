@@ -1,3 +1,5 @@
+using Tpm2Lib;
+
 namespace KeyAttestation.Tests.Server;
 
 public class KeyAttestationServer : IClassFixture<KeyAttestationServiceServerFixture>
@@ -46,8 +48,8 @@ public class KeyAttestationServer : IClassFixture<KeyAttestationServiceServerFix
         
         // Act
         var attestationData = keyAttestationService.GetAttestationData(ValidCsr);
-        var credentialValid = keyAttestationService.MakeCredential(attestationData!, ekPubCorrect);
-        var credentialInvalid = keyAttestationService.MakeCredential(attestationData!, ekPubIncorrect);
+        var credentialValid = keyAttestationService.MakeCredential(attestationData!.AikTpmPublic.GetName(), ekPubCorrect);
+        var credentialInvalid = keyAttestationService.MakeCredential(attestationData!.AikTpmPublic.GetName(), ekPubIncorrect);
 
         // Assert
         Assert.NotNull(credentialValid);
@@ -69,5 +71,23 @@ public class KeyAttestationServer : IClassFixture<KeyAttestationServiceServerFix
         // Assert
         Assert.False(attestResultInvalid!.Result);
         Assert.True(attestResultValid!.Result);
+    }
+    
+    [Fact]
+    public async Task ShouldGenerateRandomHmacKey_IfOtpSeedServiceIsInitialised()
+    {
+        // Arrange
+        var keyAttestationService = _keyAttestationServiceServerFixture.KeyAttestationService;
+        var otpSeedService = _keyAttestationServiceServerFixture.OtpSeedService;
+        var ekPubCorrect = Convert.FromBase64String(EkPubCorrect);
+        
+        // Act
+        var attestationData = keyAttestationService.GetAttestationData(ValidCsr);
+        var seed = await otpSeedService.MakeSeedBasedCredential(
+            attestationData!.AikTpmPublic.GetName(),
+            Marshaller.FromTpmRepresentation<TpmPublic>(ekPubCorrect));
+        
+        //Assert
+        Assert.NotNull(seed);
     }
 }

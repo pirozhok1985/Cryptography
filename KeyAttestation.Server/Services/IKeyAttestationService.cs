@@ -14,10 +14,10 @@ public interface IKeyAttestationService
     /// <summary>
     /// Make credential as a part of credential activation process(without tpm)
     /// </summary>
-    /// <param name="data">Attestation data to process</param>
+    /// <param name="aikName">Attestation identity key name</param>
     /// <param name="ekPub">Public portion of Endorsement key</param>
     /// <returns>Credential: byte[] EncryptedIdentity, byte[] IntegrityHmac, byte[] EncryptedSecret, byte[] clearSecret, byte[] integrityHmac</returns>
-    public Credential? MakeCredential(AttestationData data, byte[] ekPub);
+    public Credential? MakeCredential(byte[] aikName, byte[] ekPub);
 
     /// <summary>
     /// Attestation statement validation

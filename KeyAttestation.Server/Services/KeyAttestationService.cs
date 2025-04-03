@@ -35,7 +35,7 @@ public class KeyAttestationService : IKeyAttestationService
         return attestationData;
     }
 
-    public Credential? MakeCredential(AttestationData data, byte[] ekPub)
+    public Credential? MakeCredential(byte[] aikName, byte[] ekPub)
     {
         TpmPublic? ekTpmPub;
         try
@@ -53,7 +53,7 @@ public class KeyAttestationService : IKeyAttestationService
         
         try
         {
-            var idObject = ekTpmPub.CreateActivationCredentials(secret, data.AikTpmPublic!.GetName(), out var encSecret);
+            var idObject = ekTpmPub.CreateActivationCredentials(secret, aikName, out var encSecret);
             _logger.LogInformation("Encrypted credential has successfully been created! Cred: {@Cred}.", idObject);
             return new Credential(
                 idObject.encIdentity,
