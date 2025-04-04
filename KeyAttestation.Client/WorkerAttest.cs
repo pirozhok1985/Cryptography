@@ -1,8 +1,7 @@
 ﻿using System.IO.Abstractions;
 using Google.Protobuf;
-using KeyAttestation.Client.Abstractions;
-using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Factories;
+using KeyAttestation.Client.Utils;
 using KeyAttestationV1;
 using Microsoft.Extensions.Logging;
 using Tpm2Lib;
@@ -16,14 +15,14 @@ public static class WorkerAttest
     {
         var fileSystem = new FileSystem();
         var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<KeyAttestationService>();
-        using var factory = new KeyAttestationGrpcClientFactory(endPoint);
-        var client = factory.CreateClient();
-        var tpmFacade = CreateTpm2Facade(tpmDevice, logger);
+        using var factory = new GrpcClientFactoryCustom<KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient>(endPoint);
+        var client = factory.CreateClient(channel => new KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient(channel));
+        using var tpmFacade = Helper.CreateTpm2Facade(tpmDevice, logger);
 
-        using var keyAttestationService = new KeyAttestationService(fileSystem, logger, tpmFacade);
+        var keyAttestationService = new KeyAttestationService(fileSystem, logger);
 
         logger.LogInformation("Start generating PKCS10 certificate signing request");
-        var result = await keyAttestationService.GeneratePkcs10CertificationRequest(csrFilePath);
+        var result = await keyAttestationService.GeneratePkcs10CertificationRequest(tpmFacade, csrFilePath);
         if (result.Ek == null || result.Aik == null || result.Csr == null)
         {
             logger.LogError("Pkcs10 certificate signing request generation failed!");
@@ -46,6 +45,7 @@ public static class WorkerAttest
 
         logger.LogInformation("Start credential activation!");
         var activatedCred = keyAttestationService.ActivateCredential(
+            tpmFacade,
             cred,
             makeCredResponse.EncryptedSecret.ToByteArray(),
             result.Ek,
@@ -67,22 +67,4 @@ public static class WorkerAttest
         });
         logger.LogInformation("Received Attestation Response! Result: {@Content}", attestResponse);
     }
-
-    private static ITpm2Facade CreateTpm2Facade(string deviceName, ILogger logger)
-        => deviceName switch
-        {
-            "simulator" => new Tpm2Facade<TcpTpmDevice>(logger, new Tpm2DeviceCreationProperties()
-            {
-                ServerName = "localhost",
-                ServerPort = 2322
-            }),
-
-            "linux" => new Tpm2Facade<LinuxTpmDevice>(logger, new Tpm2DeviceCreationProperties()
-            {
-                DeviceName = "/dev/tpmrm0"
-            }),
-
-            "windows" => new Tpm2Facade<TbsDevice>(logger, new Tpm2DeviceCreationProperties()),
-            _ => throw new ArgumentOutOfRangeException(nameof(deviceName), deviceName, "Unrecognized device type")
-        };
 }

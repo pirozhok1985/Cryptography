@@ -1,17 +1,18 @@
 ﻿using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using Grpc.Core;
 using Grpc.Net.Client;
 using KeyAttestationV1;
 
 namespace KeyAttestation.Client.Factories;
 
-public class KeyAttestationGrpcClientFactory : IDisposable
+public class GrpcClientFactoryCustom<TClient> : IDisposable where TClient : ClientBase<TClient>
 {
     private readonly GrpcChannel? _channel;
     private bool _isDisposed;
     
-    public KeyAttestationGrpcClientFactory(string address)
+    public GrpcClientFactoryCustom(string address)
     {
         ArgumentNullException.ThrowIfNull(address);
         _channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions()
@@ -28,9 +29,9 @@ public class KeyAttestationGrpcClientFactory : IDisposable
             }
         });
     }
-    public KeyAttestationService.KeyAttestationServiceClient CreateClient()
+    public TClient CreateClient(Func<GrpcChannel, TClient> factory)
     {
-        return new KeyAttestationService.KeyAttestationServiceClient(_channel);
+        return factory.Invoke(_channel!);
     }
 
     public void Dispose()

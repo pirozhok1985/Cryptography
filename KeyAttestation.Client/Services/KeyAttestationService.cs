@@ -10,32 +10,28 @@ using Exception = System.Exception;
 
 namespace KeyAttestation.Client.Services;
 
-public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
+public sealed class KeyAttestationService : IKeyAttestationService
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger<KeyAttestationService> _logger;
-    private readonly ITpm2Facade _tpmFacade;
-    private bool _disposed;
 
     public KeyAttestationService(
         IFileSystem fileSystem,
-        ILogger<KeyAttestationService> logger,
-        ITpm2Facade tpmFacade)
+        ILogger<KeyAttestationService> logger)
     {
         _fileSystem = fileSystem;
         _logger = logger;
-        _tpmFacade = tpmFacade;
     }
     
-    public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(string? fileName = null)
+    public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(ITpm2Facade tpm2Facade, string? fileName = null)
     {
-        var ek = _tpmFacade.CreateEk();
+        var ek = tpm2Facade.CreateEk();
         if (ek == null)
         {
             return Pksc10GenerationResult.Empty;
         }
 
-        var aik = _tpmFacade.CreateAk(ek.Handle!);
+        var aik = tpm2Facade.CreateAk(ek.Handle!);
         if (aik == null)
         {
             return Pksc10GenerationResult.Empty;
@@ -52,7 +48,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
             srkHandle = ek.Handle!;
         }
 
-        var clientTpmKey = _tpmFacade.CreateKey(srkHandle);
+        var clientTpmKey = tpm2Facade.CreateKey(srkHandle);
         if (clientTpmKey == null)
         {
             return Pksc10GenerationResult.Empty;
@@ -62,7 +58,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
         ISignatureUnion? signature;
         try
         {
-            attestation = _tpmFacade.Tpm!.Certify(
+            attestation = tpm2Facade.Tpm!.Certify(
                 clientTpmKey.Handle,
                 aik.Handle,
                 [],
@@ -94,6 +90,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
     }
 
     public CredentialActivationResult? ActivateCredential(
+        ITpm2Facade tpm2Facade,
         IdObject encryptedCredential,
         byte[] encryptedSecret,
         Tpm2Key ek,
@@ -101,7 +98,7 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
     {
         try
         {
-            var activatedCredential = _tpmFacade.Tpm!.ActivateCredential(
+            var activatedCredential = tpm2Facade.Tpm!.ActivateCredential(
                 aik.Handle,
                 ek.Handle,
                 encryptedCredential,
@@ -113,15 +110,5 @@ public sealed class KeyAttestationService : IKeyAttestationService, IDisposable
             _logger.LogError("Attestation statement activation failed! Details: {Message}", e.Message);
             return null;
         }
-    }
-
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-        _tpmFacade.Dispose();
-        _disposed = true;
     }
 }

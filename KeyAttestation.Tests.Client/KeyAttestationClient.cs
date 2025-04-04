@@ -1,8 +1,17 @@
 using System.IO.Abstractions.TestingHelpers;
+using System.Security.Cryptography;
+using System.Text;
+using KeyAttestation.Client;
+using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Extensions;
+using KeyAttestation.Client.Services;
 using KeyAttestation.Client.Utils;
+using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Asn1.Cmp;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
+using OtpSeedV1;
+using Tpm2Lib;
 
 namespace KeyAttestation.Tests.Client;
 
@@ -42,5 +51,21 @@ public class KeyAttestationClient
         
         // Assert
         Assert.True(fileSystemMock.FileExists(fileName));
+    }
+
+    [Fact]
+    public void ShouldImportProvidedSeed_WithPin()
+    {
+        // Arrange
+        var loggerSeed = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<SeedTpmService>();
+        var seedTpmService = new SeedTpmService(loggerSeed);
+        var seed = RandomNumberGenerator.GetBytes(32);
+        var facade = new Tpm2Facade<LinuxTpmDevice>(loggerSeed, new Tpm2DeviceCreationProperties() { DeviceName = "/dev/tpmrm0"});
+        
+        // Act
+        var result = seedTpmService.ImportSeedToTpm(facade, seed, "123456");
+        
+        // Assert
+        Assert.NotNull(result);
     }
 }

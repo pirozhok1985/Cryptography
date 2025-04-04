@@ -12,5 +12,5 @@ message SeedRequest {
 }
 
 message SeedResponse {
-  bytes credential = 1;
+  bytes id_object = 1;
 }

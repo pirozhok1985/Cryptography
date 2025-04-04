@@ -32,7 +32,7 @@ public class OtpSeedService : IOtpSeedService
     
     private async Task<byte[]> GenerateOtpSeedAsync(byte[] aikName)
     {
-        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(Convert.ToHexString(aikName)));
+        using var stream = new MemoryStream(aikName);
         return await HMACSHA256.HashDataAsync(Encoding.UTF8.GetBytes("super secret"), stream);
     }
 }

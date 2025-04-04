@@ -24,6 +24,27 @@ var endpointOption = new Option<string>("--endpoint")
     IsRequired = true
 };
 
+var seedPrivateOption = new Option<string>("--seedPrivate")
+{
+    Description = "Private portion of imported seed",
+    Arity = ArgumentArity.ExactlyOne,
+    IsRequired = false
+};
+
+var seedPublicOption = new Option<string>("--seedPublic")
+{
+    Description = "Public portion of imported seed",
+    Arity = ArgumentArity.ExactlyOne,
+    IsRequired = false
+};
+
+var seedPinOption = new Option<string>("--pin")
+{
+    Description = "Pin required to import seed to tpm",
+    Arity = ArgumentArity.ExactlyOne,
+    IsRequired = true
+};
+
 var commandAttest = new Command("attest", "PoC KeyAttestationClient");
 commandAttest.AddOption(tpmDeviceNameOption);
 commandAttest.AddOption(csrFilePathOption);
@@ -36,10 +57,13 @@ commandAttest.SetHandler(async (tpmDevice, csrFilePath, endPoint) =>
 var commandOtp = new Command("otp", "PoC Store seed in tpm device");
 commandOtp.AddOption(endpointOption);
 commandOtp.AddOption(tpmDeviceNameOption);
-commandOtp.SetHandler(async (tpmDevice, endPoint) =>
+commandOtp.AddOption(seedPrivateOption);
+commandOtp.AddOption(seedPublicOption);
+commandOtp.AddOption(seedPinOption);
+commandOtp.SetHandler(async (tpmDevice, endPoint, seedPublic, seedPrivate, seedPin) =>
 {
-    await WorkerOtp.DoWork(tpmDevice,endPoint);
-}, tpmDeviceNameOption, endpointOption);
+    await WorkerOtp.DoWork(tpmDevice,endPoint, seedPin, seedPublic, seedPrivate);
+}, tpmDeviceNameOption, endpointOption, seedPublicOption, seedPrivateOption, seedPinOption);
 
 var rootCommand = new RootCommand("Cli testing util")
 {
