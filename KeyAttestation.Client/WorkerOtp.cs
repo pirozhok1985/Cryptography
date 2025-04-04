@@ -33,13 +33,17 @@ public static class WorkerOtp
 
         var idObject = new IdObject(makeCredResponse.IntegrityHmac.ToByteArray(),
             makeCredResponse.EncryptedIdentity.ToByteArray());
+        loggerSeed.LogInformation("Start credential activation!");
         var seed = keyAttestationService.ActivateCredential(
             tpmFacade,
             idObject,
             makeCredResponse.EncryptedSecret.ToByteArray(),
             ek,
             aik);
-
+        loggerSeed.LogInformation("Activation credential successfully finished! Result: {@Content}", seed);
+        
+        loggerSeed.LogInformation("Importing seed into tpm!!");
         var importedKey = seedTpmService.ImportSeedToTpm(tpmFacade, seed.ActivatedCredentials, "123456");
+        loggerSeed.LogInformation("Seed importing successfully finished! Details: {Key}", importedKey);
     }
 }

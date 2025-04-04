@@ -16,11 +16,15 @@ public class OtpSeedService : IOtpSeedService
 
     public Credential? MakeSeedBasedCredential(byte[] aikName, byte[] ekPub)
     {
+        _logger.LogInformation("Starting seed generation!");
         var seed = GenerateOtpSeedAsync();
+        _logger.LogInformation("Seed generation finished! Seed: {Seed}", seed);
         try
         {
             var ekPubObj = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
+            _logger.LogInformation("Starting make credential process!");
             var idObject = ekPubObj.CreateActivationCredentials(seed, aikName, out var encSeed);
+            _logger.LogInformation("Encrypted credential has successfully been created! Cred: {@Cred}.", idObject);
             return new Credential(idObject.encIdentity, encSeed, null, idObject.integrityHMAC);
         }
         catch (Exception e)
