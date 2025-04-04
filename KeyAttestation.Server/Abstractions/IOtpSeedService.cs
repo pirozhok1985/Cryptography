@@ -1,8 +1,8 @@
-using Tpm2Lib;
+using KeyAttestation.Server.Entities;
 
 namespace KeyAttestation.Server.Abstractions;
 
 public interface IOtpSeedService
 {
-    public byte[] MakeSeedBasedCredential(byte[] aikName, byte[] ekPub);
+    public Credential? MakeSeedBasedCredential(byte[] aikName, byte[] ekPub);
 }

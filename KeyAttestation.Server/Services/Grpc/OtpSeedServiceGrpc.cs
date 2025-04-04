@@ -18,8 +18,13 @@ public class OtpSeedServiceGrpc : OtpSeedV1.OtpSeedService.OtpSeedServiceBase
         var aikName = request.AikName.ToByteArray();
         var ekPub = request.EkPub.ToByteArray();
         var credential = _otpSeedService.MakeSeedBasedCredential(aikName, ekPub);
-        return credential == Array.Empty<byte>() 
+        return credential is null 
             ? Task.FromResult(new SeedResponse()) 
-            : Task.FromResult(new SeedResponse { IdObject = ByteString.CopyFrom(credential) });
+            : Task.FromResult(new SeedResponse
+            {
+                EncryptedIdentity = ByteString.CopyFrom(credential.EncryptedIdentity),
+                EncryptedSecret = ByteString.CopyFrom(credential.EncryptedSecret),
+                IntegrityHmac = ByteString.CopyFrom(credential.IntegrityHmac)
+            });
     }
 }

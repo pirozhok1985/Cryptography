@@ -12,5 +12,7 @@ message SeedRequest {
 }
 
 message SeedResponse {
-  bytes id_object = 1;
+  bytes encrypted_identity = 1;
+  bytes integrity_hmac = 2;
+  bytes encrypted_secret = 3;
 }
