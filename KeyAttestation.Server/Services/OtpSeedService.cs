@@ -14,9 +14,9 @@ public class OtpSeedService : IOtpSeedService
         _logger = logger;
     }
 
-    public async Task<byte[]> MakeSeedBasedCredential(byte[] aikName, byte[] ekPub)
+    public byte[] MakeSeedBasedCredential(byte[] aikName, byte[] ekPub)
     {
-        var seed = await GenerateOtpSeedAsync(aikName);
+        var seed = GenerateOtpSeedAsync();
         try
         {
             var ekPubObj = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
@@ -30,9 +30,8 @@ public class OtpSeedService : IOtpSeedService
         }
     }
     
-    private async Task<byte[]> GenerateOtpSeedAsync(byte[] aikName)
+    private byte[] GenerateOtpSeedAsync()
     {
-        using var stream = new MemoryStream(aikName);
-        return await HMACSHA256.HashDataAsync(Encoding.UTF8.GetBytes("super secret"), stream);
+        return RandomNumberGenerator.GetBytes(32);
     }
 }

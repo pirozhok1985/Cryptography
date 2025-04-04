@@ -74,7 +74,7 @@ public class KeyAttestationServer : IClassFixture<KeyAttestationServerFixture>
     }
     
     [Fact]
-    public async Task ShouldGenerateRandomHmacKey_IfOtpSeedServiceIsInitialised()
+    public void ShouldGenerateRandomHmacKey_IfOtpSeedServiceIsInitialised()
     {
         // Arrange
         var keyAttestationService = _keyAttestationServerFixture.KeyAttestationService;
@@ -83,7 +83,7 @@ public class KeyAttestationServer : IClassFixture<KeyAttestationServerFixture>
         
         // Act
         var attestationData = keyAttestationService.GetAttestationData(ValidCsr);
-        var seed = await otpSeedService.MakeSeedBasedCredential(
+        var seed = otpSeedService.MakeSeedBasedCredential(
             attestationData!.AikTpmPublic.GetName(),
             Marshaller.FromTpmRepresentation<TpmPublic>(ekPubCorrect));
         

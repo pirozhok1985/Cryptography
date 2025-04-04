@@ -13,13 +13,13 @@ public class OtpSeedServiceGrpc : OtpSeedV1.OtpSeedService.OtpSeedServiceBase
     {
         _otpSeedService = otpSeedService;
     }
-    public override async Task<SeedResponse> GetOtpSeed(SeedRequest request, ServerCallContext context)
+    public override Task<SeedResponse> GetOtpSeed(SeedRequest request, ServerCallContext context)
     {
         var aikName = request.AikName.ToByteArray();
         var ekPub = request.EkPub.ToByteArray();
-        var credential = await _otpSeedService.MakeSeedBasedCredential(aikName, ekPub);
+        var credential = _otpSeedService.MakeSeedBasedCredential(aikName, ekPub);
         return credential == Array.Empty<byte>() 
-            ? new SeedResponse() 
-            : new SeedResponse { IdObject = ByteString.CopyFrom(credential) };
+            ? Task.FromResult(new SeedResponse()) 
+            : Task.FromResult(new SeedResponse { IdObject = ByteString.CopyFrom(credential) });
     }
 }
