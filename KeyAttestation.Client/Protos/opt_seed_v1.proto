@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package otp_seed_v1;
+
+service OtpSeedService {
+  rpc GetOtpSeed (SeedRequest) returns (SeedResponse);
+}
+
+message SeedRequest {
+  bytes aik_name = 1;
+  bytes ek_pub = 2;
+}
+
+message SeedResponse {
+  bytes credential = 1;
+}

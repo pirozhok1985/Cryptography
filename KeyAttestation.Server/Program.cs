@@ -1,5 +1,4 @@
 using KeyAttestation.Server.Abstractions;
-using KeyAttestation.Server.Endpoints;
 using KeyAttestation.Server.Services;
 using KeyAttestation.Server.Services.Grpc;
 
@@ -10,6 +9,6 @@ builder.Services.AddScoped<IOtpSeedService, OtpSeedService>();
 var app = builder.Build();
 
 app.MapGrpcService<KeyAttestationServiceGrpc>();
-app.MapPost("seed", async (context) => await SeedEndpoint.Endpoint(context));
+app.MapGrpcService<OtpSeedServiceGrpc>();
 
 app.Run();

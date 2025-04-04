@@ -4,5 +4,5 @@ namespace KeyAttestation.Server.Abstractions;
 
 public interface IOtpSeedService
 {
-    public Task<byte[]> MakeSeedBasedCredential(byte[] aikName, TpmPublic ekPub);
+    public Task<byte[]> MakeSeedBasedCredential(byte[] aikName, byte[] ekPub);
 }

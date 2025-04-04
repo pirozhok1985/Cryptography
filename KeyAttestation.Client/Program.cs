@@ -24,14 +24,27 @@ var endpointOption = new Option<string>("--endpoint")
     IsRequired = true
 };
 
-var rootCommand = new RootCommand("PoC KeyAttestationClient");
-rootCommand.AddOption(tpmDeviceNameOption);
-rootCommand.AddOption(csrFilePathOption);
-rootCommand.AddOption(endpointOption);
-
-rootCommand.SetHandler(async (tpmDevice, csrFilePath, endPoint) =>
+var commandAttest = new Command("attest", "PoC KeyAttestationClient");
+commandAttest.AddOption(tpmDeviceNameOption);
+commandAttest.AddOption(csrFilePathOption);
+commandAttest.AddOption(endpointOption);
+commandAttest.SetHandler(async (tpmDevice, csrFilePath, endPoint) =>
 {
-    await Worker.DoWork(tpmDevice, csrFilePath, endPoint);
+    await WorkerAttest.DoWork(tpmDevice, csrFilePath, endPoint);
 }, tpmDeviceNameOption, csrFilePathOption, endpointOption);
+
+var commandOtp = new Command("otp", "PoC Store seed in tpm device");
+commandOtp.AddOption(endpointOption);
+commandOtp.AddOption(tpmDeviceNameOption);
+commandOtp.SetHandler(async (tpmDevice, endPoint) =>
+{
+    await WorkerOtp.DoWork(tpmDevice,endPoint);
+}, tpmDeviceNameOption, endpointOption);
+
+var rootCommand = new RootCommand("Cli testing util")
+{
+    commandAttest,
+    commandOtp
+};
 
 await rootCommand.InvokeAsync(args);

@@ -10,7 +10,7 @@ using KeyAttestationService = KeyAttestation.Client.Services.KeyAttestationServi
 
 namespace KeyAttestation.Client;
 
-public static class Worker
+public static class WorkerAttest
 {
     public static async Task DoWork(string tpmDevice, string? csrFilePath, string endPoint)
     {

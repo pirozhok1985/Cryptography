@@ -1,30 +1,38 @@
 using System.Security.Cryptography;
 using System.Text;
 using KeyAttestation.Server.Abstractions;
-using KeyAttestation.Server.Entities;
 using Tpm2Lib;
 
 namespace KeyAttestation.Server.Services;
 
 public class OtpSeedService : IOtpSeedService
 {
-    private readonly IKeyAttestationService _keyAttestationService;
+    private readonly ILogger<OtpSeedService> _logger;
 
-    public OtpSeedService(IKeyAttestationService keyAttestationService)
+    public OtpSeedService(ILogger<OtpSeedService> logger)
     {
-        _keyAttestationService = keyAttestationService;
+        _logger = logger;
     }
 
-    public async Task<byte[]> MakeSeedBasedCredential(byte[] aikName, TpmPublic ekPub)
+    public async Task<byte[]> MakeSeedBasedCredential(byte[] aikName, byte[] ekPub)
     {
-        var seed = await GenerateOtpSeedAsync();
-        var idObject = ekPub.CreateActivationCredentials(seed, aikName, out var encSeed);
-        return idObject.GetTpmRepresentation();
+        var seed = await GenerateOtpSeedAsync(aikName);
+        try
+        {
+            var ekPubObj = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
+            var idObject = ekPubObj.CreateActivationCredentials(seed, aikName, out var encSeed);
+            return idObject.GetTpmRepresentation();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("MakeSeedBasedCredential failed! Error: {Message}",e.Message);
+            return [];
+        }
     }
     
-    private async Task<byte[]> GenerateOtpSeedAsync()
+    private async Task<byte[]> GenerateOtpSeedAsync(byte[] aikName)
     {
-        using var stream = new MemoryStream(Encoding.UTF8.GetBytes("Random Random Random Random"));
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(Convert.ToHexString(aikName)));
         return await HMACSHA256.HashDataAsync(Encoding.UTF8.GetBytes("super secret"), stream);
     }
 }
