@@ -4,12 +4,12 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyAttestation.Tests.Server;
 
-public abstract class KeyAttestationServiceServerFixture
+public class KeyAttestationServerFixture
 {
     public IKeyAttestationService KeyAttestationService { get; init; }
     public IOtpSeedService OtpSeedService { get; init; }
 
-    protected KeyAttestationServiceServerFixture()
+    public KeyAttestationServerFixture()
     {
         var loggerAttest = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<KeyAttestationService>();
         var loggerSeed = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<OtpSeedService>();

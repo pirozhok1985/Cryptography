@@ -2,13 +2,13 @@ using Tpm2Lib;
 
 namespace KeyAttestation.Tests.Server;
 
-public class KeyAttestationServer : IClassFixture<KeyAttestationServiceServerFixture>
+public class KeyAttestationServer : IClassFixture<KeyAttestationServerFixture>
 {
-    private readonly KeyAttestationServiceServerFixture _keyAttestationServiceServerFixture;
+    private readonly KeyAttestationServerFixture _keyAttestationServerFixture;
 
-    public KeyAttestationServer(KeyAttestationServiceServerFixture keyAttestationServiceServerFixture)
+    public KeyAttestationServer(KeyAttestationServerFixture keyAttestationServerFixture)
     {
-        _keyAttestationServiceServerFixture = keyAttestationServiceServerFixture;
+        _keyAttestationServerFixture = keyAttestationServerFixture;
     }
 
     private const string ForgedCsr =
@@ -27,7 +27,7 @@ public class KeyAttestationServer : IClassFixture<KeyAttestationServiceServerFix
     public void ShouldGenerateAttestationData_IfCsrIsCorrect()
     {
         // Arrange
-        var keyAttestationService = _keyAttestationServiceServerFixture.KeyAttestationService;
+        var keyAttestationService = _keyAttestationServerFixture.KeyAttestationService;
         
         // Act
         var attestationDataCorrect = keyAttestationService.GetAttestationData(ValidCsr);
@@ -42,7 +42,7 @@ public class KeyAttestationServer : IClassFixture<KeyAttestationServiceServerFix
     public void ShouldGenerateCredential_IfAttestationDataIsNotNull_And_EkPubIsCorrect()
     {
         // Arrange
-        var keyAttestationService = _keyAttestationServiceServerFixture.KeyAttestationService;
+        var keyAttestationService = _keyAttestationServerFixture.KeyAttestationService;
         var ekPubCorrect = Convert.FromBase64String(EkPubCorrect);
         var ekPubIncorrect = Convert.FromBase64String(EkPubIncorrect);
         
@@ -60,7 +60,7 @@ public class KeyAttestationServer : IClassFixture<KeyAttestationServiceServerFix
     public void ShouldVerifyAttestData_IfCsrIsCorrect()
     {
         // Arrange
-        var keyAttestationService = _keyAttestationServiceServerFixture.KeyAttestationService;
+        var keyAttestationService = _keyAttestationServerFixture.KeyAttestationService;
         
         // Act
         var attestationDataWithInValidCsr = keyAttestationService.GetAttestationData(ForgedCsr);
@@ -77,8 +77,8 @@ public class KeyAttestationServer : IClassFixture<KeyAttestationServiceServerFix
     public async Task ShouldGenerateRandomHmacKey_IfOtpSeedServiceIsInitialised()
     {
         // Arrange
-        var keyAttestationService = _keyAttestationServiceServerFixture.KeyAttestationService;
-        var otpSeedService = _keyAttestationServiceServerFixture.OtpSeedService;
+        var keyAttestationService = _keyAttestationServerFixture.KeyAttestationService;
+        var otpSeedService = _keyAttestationServerFixture.OtpSeedService;
         var ekPubCorrect = Convert.FromBase64String(EkPubCorrect);
         
         // Act

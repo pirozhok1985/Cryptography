@@ -18,9 +18,8 @@ public class OtpSeedServiceGrpc : OtpSeedV1.OtpSeedService.OtpSeedServiceBase
         var aikName = request.AikName.ToByteArray();
         var ekPub = request.EkPub.ToByteArray();
         var credential = await _otpSeedService.MakeSeedBasedCredential(aikName, ekPub);
-        return new SeedResponse()
-        {
-            Credential = ByteString.CopyFrom(credential),
-        };
+        return credential == Array.Empty<byte>() 
+            ? new SeedResponse() 
+            : new SeedResponse { Credential = ByteString.CopyFrom(credential) };
     }
 }
