@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 using KeyAttestation.Client.Utils;
 using Tpm2Lib;
@@ -14,12 +15,24 @@ public class RawRsaCustom
 
     public void Init(TpmPublic tpmPublic, TpmPrivate tpmPrivate)
     {
-        var clPriv = new Tpm2bPrivateKeyRsa(tpmPrivate.buffer);
+
+        var rsaPrime = GetTpmPrivateRsaPrime(tpmPublic.nameAlg, tpmPrivate.buffer);
         var parameters = tpmPublic.parameters as RsaParms;
         E = new BigInteger(parameters?.exponent == 0U ? RsaParms.DefaultExponent : BitConverter.GetBytes(parameters!.exponent));
         N = RawRsa.FromBigEndian((tpmPublic.unique as Tpm2bPublicKeyRsa)!.buffer);
-        P = RawRsa.FromBigEndian(clPriv.buffer);
+        P = RawRsa.FromBigEndian(rsaPrime.buffer);
         Q = N / P;
         D = Helper.ModInverse(E, N - (P + Q - BigInteger.One));
+    }
+
+    private Tpm2bPrivateKeyRsa GetTpmPrivateRsaPrime(TpmAlgId algId, byte[] buffer)
+    {
+        var integrityInnerOuterSize = CryptoLib.DigestSize(algId) * 8 * 2;
+        return buffer.Length switch
+        {
+            222 => new Tpm2bPrivateKeyRsa(buffer),
+            734 => new Tpm2bPrivateKeyRsa(buffer[integrityInnerOuterSize..]),
+            _ => throw new ApplicationException($"Unsupported TpmPrivet buffer size! Size: {buffer.Length}")
+        };
     }
 }
