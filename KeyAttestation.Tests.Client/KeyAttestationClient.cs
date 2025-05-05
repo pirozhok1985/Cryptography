@@ -1,4 +1,5 @@
 using System.IO.Abstractions.TestingHelpers;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using KeyAttestation.Client;
@@ -11,6 +12,7 @@ using Org.BouncyCastle.Asn1.Cmp;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using OtpSeedV1;
+using Shouldly;
 using Tpm2Lib;
 
 namespace KeyAttestation.Tests.Client;
@@ -84,5 +86,10 @@ public class KeyAttestationClient
         rawRsaCustom.Init(pubTpm, privTpm);
         
         // Assert
+        rawRsaCustom.D.ShouldBeGreaterThan(BigInteger.One);
+        rawRsaCustom.N.ShouldBeGreaterThan(BigInteger.One);
+        rawRsaCustom.P.ShouldBeGreaterThan(BigInteger.One);
+        rawRsaCustom.Q.ShouldBeGreaterThan(BigInteger.One);
+        rawRsaCustom.E.ShouldBeEquivalentTo(new BigInteger(65537));
     }
 }
