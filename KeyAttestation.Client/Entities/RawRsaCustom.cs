@@ -32,7 +32,7 @@ public class RawRsaCustom
         {
             222 => new Tpm2bPrivateKeyRsa(buffer),
             734 => new Tpm2bPrivateKeyRsa(buffer[integrityInnerOuterSize..]),
-            _ => throw new ApplicationException($"Unsupported TpmPrivet buffer size! Size: {buffer.Length}")
+            _ => throw new ApplicationException($"Unsupported TpmPrivate buffer size! Size: {buffer.Length}")
         };
     }
 }
