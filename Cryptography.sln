@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pkcs10RequestGenerator", "Pkcs10RequestGenerator\Pkcs10RequestGenerator.csproj", "{E791E2D7-61DA-4AA2-8737-0583F528CC39}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyAttestation.Client", "KeyAttestation.Client\KeyAttestation.Client.csproj", "{AB810AC8-1EF3-449E-89F4-69B4D3A44F23}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyAttestation.Tests.Client", "KeyAttestation.Tests.Client\KeyAttestation.Tests.Client.csproj", "{9D413EE7-51BA-415C-AF99-63A88E30F1F9}"
@@ -16,10 +14,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E791E2D7-61DA-4AA2-8737-0583F528CC39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E791E2D7-61DA-4AA2-8737-0583F528CC39}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E791E2D7-61DA-4AA2-8737-0583F528CC39}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E791E2D7-61DA-4AA2-8737-0583F528CC39}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AB810AC8-1EF3-449E-89F4-69B4D3A44F23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AB810AC8-1EF3-449E-89F4-69B4D3A44F23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB810AC8-1EF3-449E-89F4-69B4D3A44F23}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -36,5 +30,8 @@ Global
 		{61C10A20-04C4-4BFA-B695-13951DA07DB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61C10A20-04C4-4BFA-B695-13951DA07DB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61C10A20-04C4-4BFA-B695-13951DA07DB2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
