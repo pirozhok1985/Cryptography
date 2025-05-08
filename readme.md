@@ -8,8 +8,11 @@
 1. Запускаем сервер, предварительно указав нужный порт и ssl в конфиге, при необходимости.
 2. Запускаем клиент.
 Пример запуска клиента под windows:
+
  KeyAttestation.Client.exe attest --tpmDevice windows --endpoint "https://localhost:8085"
+ 
 Пример запуска клиента под linux:
+
  KeyAttestation.Client.exe attest --tpmDevice linux --endpoint "https://localhost:8085"
 
 Для успешной сборки требуется пакет MSR.TSS версии 2.2.0
@@ -26,10 +29,15 @@ Communication between client and server is implemented using gRPC.
 Launch hints:
 1. Launch server using apropriate web configuration - hostname, port, ssl/tls, etc...
 2. Launch client with required parameters.
+   
 Example:
+
  windows:
+ 
   KeyAttestation.Client.exe attest --tpmDevice windows --endpoint "https://localhost:8085
+  
  linux:
+ 
   KeyAttestation.Client.exe attest --tpmDevice linux --endpoint "https://localhost:8085"
 
 MSR.TSS nuget 2.2.0 is required. This package is not published in nuget repository(the old version only). Consider downloding it from MSR.TSS repository before building the project.
