@@ -9,6 +9,7 @@ public static class TpmExtensions
 {
     public static AsymmetricCipherKeyPair ToAsymmetricCipherKeyPair(this Tpm2Key key)
     {
+        // RawRsa class doesn`t work on both platforms, so i`ve created a new simple one, based on RawRsa
         var rawRsa = new RawRsaCustom();
         rawRsa.Init(key.Public!, key.Private!);
         return new AsymmetricCipherKeyPair(

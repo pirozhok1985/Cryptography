@@ -30,8 +30,8 @@ public class RawRsaCustom
         var integrityInnerOuterSize = CryptoLib.DigestSize(algId) * 8 * 2;
         return buffer.Length switch
         {
-            222 => new Tpm2bPrivateKeyRsa(buffer),
-            734 => new Tpm2bPrivateKeyRsa(buffer[integrityInnerOuterSize..]),
+            222 => new Tpm2bPrivateKeyRsa(buffer), // linux, without integrityInner and integrityOuter fields
+            734 => new Tpm2bPrivateKeyRsa(buffer[integrityInnerOuterSize..]), // windows
             _ => throw new ApplicationException($"Unsupported TpmPrivate buffer size! Size: {buffer.Length}")
         };
     }

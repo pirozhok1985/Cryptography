@@ -41,7 +41,7 @@ public sealed class KeyAttestationService : IKeyAttestationService
         TpmHandle srkHandle;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            srkHandle = TpmHandle.Persistent(5);
+            srkHandle = TpmHandle.Persistent(5); // Preconfigured parent key under 0x81000005. You have to create it first or use endorsemnt key as a parent.
         }
         else
         {

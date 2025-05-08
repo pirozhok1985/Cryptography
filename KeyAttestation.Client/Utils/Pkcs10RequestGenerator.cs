@@ -12,7 +12,7 @@ public static class Pkcs10RequestGenerator
     public static Pkcs10CertificationRequest Generate(AsymmetricKeyParameter publicKey, AsymmetricKeyParameter privateKey,  SignedData signedData)
     {
         var x509Name =
-            new X509Name("CN=18497320,OU=Users,OU=LinuxUser,E=eeanisimov@sberbank.ru,DC=sigma,DC=sbrf,DC=ru");
+            new X509Name("CN=test_user,OU=Users,OU=LinuxUser,E=test_user@lab.local,DC=lab,DC=local");
         var osVersionAttr = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.13.2.3"),
             new DerSet(new DerIA5String("10.0.19045.2")));
         var clientInfo = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.21.20"),
@@ -20,7 +20,7 @@ public static class Pkcs10RequestGenerator
                 new DerSequence(
                     new DerInteger(09),
                     new DerUtf8String(Environment.MachineName),
-                    new DerUtf8String($"SIGMA\\{Environment.UserName}"),
+                    new DerUtf8String($"LAB\\{Environment.UserName}"),
                     new DerUtf8String("attestation_generator.exe"))));
         var enrollmentCsp = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.13.2.2"),
             new DerSet(
