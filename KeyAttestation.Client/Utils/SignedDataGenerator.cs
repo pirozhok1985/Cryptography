@@ -13,7 +13,7 @@ namespace KeyAttestation.Client.Utils;
 
 public static class SignedDataGenerator
 {
-    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, byte[] publicKey, Tpm2Key aik)
+    public static SignedData GenerateCms(byte[] sigData, byte[] attestationStatement, byte[] publicKey, Tpm2Key aik, byte[] ekCert)
     {
         var aikKey = aik.ToAsymmetricCipherKeyPair();
         var subjectPubInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(aikKey.Public!);
@@ -34,7 +34,8 @@ public static class SignedDataGenerator
                 new DerOctetString(attestationStatement)),
             new DerSet(                    
                 new DerSequence(new DerObjectIdentifier("2.23.133.8.12"), new DerOctetString(publicKey)), // tcg-at-tpmSecurityTarget
-                new DerSequence(new DerObjectIdentifier("2.23.133.8.3"), new DerOctetString(aik.Public))), // tcg-kp-AIKCertificate,
+                new DerSequence(new DerObjectIdentifier("2.23.133.8.3"), new DerOctetString(aik.Public)), // tcg-kp-AIKCertificate,
+                new DerSequence(new DerObjectIdentifier("2.23.133.8.1"), new DerOctetString(ekCert))),
             new DerSet(),
             new DerSet(signerInfo));
     }

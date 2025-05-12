@@ -92,4 +92,18 @@ public class KeyAttestationClient
         rawRsaCustom.Q.ShouldBeGreaterThan(BigInteger.One);
         rawRsaCustom.E.ShouldBeEquivalentTo(new BigInteger(65537));
     }
+
+    [Fact]
+    public void GetPemEncodedEkCert_ShouldReturnX509Certificate()
+    {
+        // Arrange
+        var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<KeyAttestationService>();
+        var facade = new Tpm2Facade<TbsDevice>(logger, new Tpm2DeviceCreationProperties());
+
+        // Act
+        var cert = facade.GetEkCert();
+
+        // Arrange
+
+    }
 }

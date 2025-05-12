@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using KeyAttestation.Client.Abstractions;
 using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Factories;
@@ -45,6 +46,14 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
             return null;
         }
     }
+
+    
+    public byte[] GetEkCert()
+    {
+        var ekCertIndex = TpmHandle.NV(0xc00002);
+        var ekCertPub = Tpm!.NvReadPublic(ekCertIndex, out var _);
+        return Tpm.NvRead(TpmRh.Owner, ekCertPub.nvIndex, ekCertPub.dataSize, 0);
+    } 
     
     public Tpm2Key? CreateEk()
     {

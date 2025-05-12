@@ -1,5 +1,5 @@
-﻿using KeyAttestation.Client.Entities;
-using KeyAttestation.Client.Utils;
+﻿using System.Security.Cryptography.X509Certificates;
+using KeyAttestation.Client.Entities;
 using Tpm2Lib;
 
 namespace KeyAttestation.Client.Abstractions;
@@ -27,6 +27,12 @@ public interface ITpm2Facade : IDisposable
     /// </summary>
     /// <returns>TpmKey: TpmPublic, TpmHandle</returns>
     public Tpm2Key? CreateEk();
+
+    /// <summary>
+    /// Get Endorsement Key Certificate
+    /// </summary>
+    /// <returns>Pem encoded x509 certificate</returns>
+    public byte[] GetEkCert();
     
     /// <summary>
     /// Import hmac key

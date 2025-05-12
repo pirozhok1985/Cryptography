@@ -25,6 +25,12 @@ public sealed class KeyAttestationService : IKeyAttestationService
     
     public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(ITpm2Facade tpm2Facade, string? fileName = null)
     {
+        var ekCert = tpm2Facade.GetEkCert();
+        if (ekCert is null)
+        {
+            return Pksc10GenerationResult.Empty;
+        }
+
         var ek = tpm2Facade.CreateEk();
         if (ek == null)
         {
@@ -73,7 +79,7 @@ public sealed class KeyAttestationService : IKeyAttestationService
 
         var clientRsaKeyPair = clientTpmKey.ToAsymmetricCipherKeyPair();
 
-        var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey.Public!.GetTpmRepresentation(), aik);
+        var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey.Public!.GetTpmRepresentation(), aik, ekCert);
         var csr = Pkcs10RequestGenerator.Generate(clientRsaKeyPair.Public, clientRsaKeyPair.Private, cms);
 
         if (!string.IsNullOrEmpty(fileName))
