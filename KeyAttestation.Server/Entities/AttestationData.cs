@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using Tpm2Lib;
 
 namespace KeyAttestation.Server.Entities;
@@ -11,15 +12,18 @@ public class AttestationData
     public TpmPublic AikTpmPublic { get; init; }
     
     public TpmPublic ClientTpmPublic { get; init; }
+
+    public X509Certificate2 EKCertificate { get; init; }
     
     public string? Csr { get; set; }
 
-    public AttestationData(Attest? attestation, byte[] signature, TpmPublic? aikTpmPublic, TpmPublic? clientTpmPublic)
+    public AttestationData(Attest? attestation, byte[] signature, TpmPublic? aikTpmPublic, TpmPublic? clientTpmPublic, X509Certificate2 ekCert)
     {
         Attestation = attestation ?? throw new ArgumentNullException(nameof(attestation));
         Signature = signature;
         AikTpmPublic = aikTpmPublic ?? throw new ArgumentNullException(nameof(aikTpmPublic));
         ClientTpmPublic = clientTpmPublic ?? throw new ArgumentNullException(nameof(clientTpmPublic));
+        EKCertificate = ekCert ?? throw new ArgumentNullException(nameof(ekCert));
     }
 
     public override string ToString()

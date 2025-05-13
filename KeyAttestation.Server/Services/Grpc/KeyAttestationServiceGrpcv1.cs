@@ -7,13 +7,13 @@ using KeyAttestationV1;
 
 namespace KeyAttestation.Server.Services.Grpc;
 
-public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.KeyAttestationServiceBase
+public class KeyAttestationServiceGrpcv1 : KeyAttestationV1.KeyAttestationService.KeyAttestationServiceBase
 {
     private readonly IKeyAttestationService _keyAttestationService;
     private readonly ILogger<KeyAttestationService> _logger;
     private static ConcurrentDictionary<int, (AttestationData Data, byte[] CredentialBlob)> _attestCandidates = new();
 
-    public KeyAttestationServiceGrpc(IKeyAttestationService keyAttestationService, ILogger<KeyAttestationService> logger)
+    public KeyAttestationServiceGrpcv1(IKeyAttestationService keyAttestationService, ILogger<KeyAttestationService> logger)
     {
         _keyAttestationService = keyAttestationService;
         _logger = logger;
@@ -55,7 +55,7 @@ public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.
         _logger.LogInformation("Processing Attestation request finished!");
         return await Task.FromResult(new AttestationResponse
         {
-            IsAttested = attestResult.Result,
+            IsAttested = attestResult!.Result,
             Message = attestResult.Message,
             Certificate = "-----BEGIN CERTIFICATE-----....."
         });
