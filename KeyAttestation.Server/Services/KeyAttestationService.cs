@@ -168,6 +168,6 @@ public class KeyAttestationService : IKeyAttestationService
         }
 
         logger.LogInformation("Successfully retrieved aik and client keys from Signed data: Aik:{@Aik}, ClientKey:{@Client}", keys.Value.Aik, keys.Value.Client);
-        return new AttestationData(attest, signature, keys.Value.Aik, keys.Value.Client);
+        return new AttestationData(attest, signature, keys.Value.Aik, keys.Value.Client, keys.Value.EkCertificate);
     }
 }
