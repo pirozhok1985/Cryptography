@@ -1,17 +1,17 @@
 using System.IO.Abstractions.TestingHelpers;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Text;
+using System.Security.Cryptography.X509Certificates;
 using KeyAttestation.Client;
+using KeyAttestation.Client.Abstractions;
 using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Extensions;
 using KeyAttestation.Client.Services;
 using KeyAttestation.Client.Utils;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Asn1.Cmp;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
-using OtpSeedV1;
 using Shouldly;
 using Tpm2Lib;
 
@@ -65,10 +65,26 @@ public class KeyAttestationClient
         var loggerSeed = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<SeedTpmService>();
         var seedTpmService = new SeedTpmService(loggerSeed);
         var seed = RandomNumberGenerator.GetBytes(32);
-        var facade = new Tpm2Facade<LinuxTpmDevice>(loggerSeed, new Tpm2DeviceCreationProperties() { DeviceName = "/dev/tpmrm0"});
+        ITpm2Facade facade;
+        TpmHandle srkHandle;
+        if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            facade = new Tpm2Facade<LinuxTpmDevice>(loggerSeed, new Tpm2DeviceCreationProperties() { DeviceName = "/dev/tpmrm0"});
+            srkHandle = TpmHandle.Persistent(5);
+        }
+        else if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            facade = new Tpm2Facade<TbsDevice>(loggerSeed, new Tpm2DeviceCreationProperties());
+            var ek = facade.CreateEk();
+            srkHandle = ek.Handle;
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("Current operation system not supported!");
+        }
         
         // Act
-        var result = seedTpmService.ImportSeedToTpm(facade, seed, "123456");
+        var result = seedTpmService.ImportSeedToTpm(facade, srkHandle, seed, "123456");
         
         // Assert
         Assert.NotNull(result);
@@ -98,12 +114,29 @@ public class KeyAttestationClient
     {
         // Arrange
         var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<KeyAttestationService>();
-        var facade = new Tpm2Facade<TbsDevice>(logger, new Tpm2DeviceCreationProperties());
+                ITpm2Facade facade;
+        if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            facade = new Tpm2Facade<LinuxTpmDevice>(logger, new Tpm2DeviceCreationProperties() { DeviceName = "/dev/tpmrm0"});
+        }
+        else if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            facade = new Tpm2Facade<TbsDevice>(logger, new Tpm2DeviceCreationProperties());
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("Current operation system not supported!");
+        }
+        X509Certificate2? x509Cert = null;
 
         // Act
-        var cert = facade.GetEkCert();
+        try
+        {
+            x509Cert = new X509Certificate2(facade.GetEkCert());
+        }
+        catch {}
 
-        // Arrange
-
+        // Assert
+        Assert.NotNull(x509Cert);
     }
 }

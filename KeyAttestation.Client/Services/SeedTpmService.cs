@@ -14,9 +14,8 @@ public class SeedTpmService : ISeedTpmService
         _logger = logger;
     }
     
-    public Tpm2Key? ImportSeedToTpm(ITpm2Facade tpm2Facade, byte[] seed, string pin)
+    public Tpm2Key? ImportSeedToTpm(ITpm2Facade tpm2Facade, TpmHandle parent, byte[] seed, string pin)
     {
-        var parent = TpmHandle.Persistent(5);
         return tpm2Facade.ImportHmacKey(parent, seed, pin);
     }
 }

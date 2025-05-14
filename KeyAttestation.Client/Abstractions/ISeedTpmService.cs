@@ -5,5 +5,5 @@ namespace KeyAttestation.Client.Abstractions;
 
 public interface ISeedTpmService
 {
-    public Tpm2Key? ImportSeedToTpm(ITpm2Facade tpm2Facade, byte[] seed, string pin);
+    public Tpm2Key? ImportSeedToTpm(ITpm2Facade tpm2Facade, TpmHandle parent, byte[] seed, string pin);
 }

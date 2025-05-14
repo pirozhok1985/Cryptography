@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.Runtime.InteropServices;
 using Google.Protobuf;
 using KeyAttestation.Client.Factories;
 using KeyAttestation.Client.Services;
@@ -43,7 +44,16 @@ public static class WorkerOtp
         loggerSeed.LogInformation("Activation credential successfully finished! Result: {@Content}", seed);
         
         loggerSeed.LogInformation("Importing seed into tpm!!");
-        var importedKey = seedTpmService.ImportSeedToTpm(tpmFacade, seed.ActivatedCredentials, "123456");
+        TpmHandle srkHandle;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            srkHandle = TpmHandle.Persistent(5); // Preconfigured parent key under 0x81000005. You have to create it first or use endorsemnt key as a parent.
+        }
+        else
+        {
+            srkHandle = ek.Handle!;
+        }
+        var importedKey = seedTpmService.ImportSeedToTpm(tpmFacade, srkHandle, seed.ActivatedCredentials, "123456");
         loggerSeed.LogInformation("Seed importing successfully finished! Details: {Key}", importedKey);
     }
 }

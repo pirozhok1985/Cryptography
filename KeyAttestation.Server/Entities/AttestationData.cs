@@ -8,6 +8,8 @@ public class AttestationData
     public Attest Attestation { get; init; }
     
     public byte[] Signature { get; init; }
+
+    public TpmPublic EkTpmPublic { get; init; }
     
     public TpmPublic AikTpmPublic { get; init; }
     
@@ -17,10 +19,11 @@ public class AttestationData
     
     public string? Csr { get; set; }
 
-    public AttestationData(Attest? attestation, byte[] signature, TpmPublic? aikTpmPublic, TpmPublic? clientTpmPublic, X509Certificate2 ekCert)
+    public AttestationData(Attest? attestation, byte[] signature, TpmPublic? ekTpmPublic, TpmPublic? aikTpmPublic, TpmPublic? clientTpmPublic, X509Certificate2 ekCert)
     {
         Attestation = attestation ?? throw new ArgumentNullException(nameof(attestation));
         Signature = signature;
+        EkTpmPublic = ekTpmPublic ?? throw new ArgumentNullException(nameof(ekTpmPublic));
         AikTpmPublic = aikTpmPublic ?? throw new ArgumentNullException(nameof(aikTpmPublic));
         ClientTpmPublic = clientTpmPublic ?? throw new ArgumentNullException(nameof(clientTpmPublic));
         EKCertificate = ekCert ?? throw new ArgumentNullException(nameof(ekCert));

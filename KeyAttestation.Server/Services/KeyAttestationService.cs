@@ -71,6 +71,16 @@ public class KeyAttestationService : IKeyAttestationService
 
     public AttestationResult Attest(AttestationData data)
     {
+        if (data is null)
+        {
+            _logger.LogError("No attestation data provided!");
+            return new AttestationResult
+            {
+                Result = false,
+                Message = "Attestation failed! No attestation data provided!",
+            };
+        }
+        
         if (!VerifyCertify(data, _logger))
         {
             _logger.LogError("Attestation failed!");
@@ -140,34 +150,48 @@ public class KeyAttestationService : IKeyAttestationService
 
     private static AttestationData? GetAttestationRequest(Pkcs10CertificationRequest request, ILogger logger)
     {
-        var attestationStatement = request.GetSignedData(logger);
+        var attestationStatement = request.GetAttestationStatement(logger);
         if (attestationStatement is null)
         {
             return null;
         }
+        logger.LogInformation("Successfully retrieved attestation statement from Pkcs10CertificationRequest!");
 
-        logger.LogInformation("Successfully retrieved Signed data from Pkcs10CertificationRequest: SignedData: {@Data}", attestationStatement);
-        var attest = attestationStatement.GetAttestData(logger);
+        var signedData = attestationStatement.GetSignedData(logger);
+        if (signedData is null)
+        {
+            return null;
+        }
+        logger.LogInformation("Successfully retrieved signed data from Pkcs10CertificationRequest! Signed Data: {@Data}", signedData);
+
+        var attest = signedData.GetAttestData(logger);
         if (attest is null)
         {
             return null;
         }
-
         logger.LogInformation("Successfully retrieved Attestation data from Signed data: AttestData: {@Attest}", attest);
-        var signature = attestationStatement.GetAttestSignature(logger);
+
+        var signature = signedData.GetAttestSignature(logger);
         if (signature.Length == 0)
         {
             return null;
         }
-
         logger.LogInformation("Successfully retrieved signature from Signed data: Signature: {Sig}", signature);
-        var keys = attestationStatement.GetSignedDataKeys(logger);
+
+        var ekCert = signedData.GetEkCertificate(logger);
+        if (ekCert is null)
+        {
+            return null;
+        }
+        logger.LogInformation("Successfully retrieved ek certificate from Signed data: EKCert:{@EKCertificate}", ekCert);
+
+        var keys = attestationStatement.GetTpmPublicKeys(logger);
         if (keys is null)
         {
             return null;
         }
+        logger.LogInformation("Successfully retrieved aik and client keys from Signed data: Ek:{@Ek} Aik:{@Aik}, ClientKey:{@Client}", keys.Value.ek, keys.Value.aik, keys.Value.client);
 
-        logger.LogInformation("Successfully retrieved aik and client keys from Signed data: Aik:{@Aik}, ClientKey:{@Client}", keys.Value.Aik, keys.Value.Client);
-        return new AttestationData(attest, signature, keys.Value.Aik, keys.Value.Client, keys.Value.EkCertificate);
+        return new AttestationData(attest, signature, keys.Value.ek, keys.Value.aik, keys.Value.client, ekCert);
     }
 }

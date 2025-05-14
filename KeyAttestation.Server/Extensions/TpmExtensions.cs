@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
+using Org.BouncyCastle.Pkcs;
 using Tpm2Lib;
 
 namespace KeyAttestation.Server.Extensions;
@@ -46,10 +47,8 @@ public static class TpmExtensions
         }
     }
 
-    public static (TpmPublic Aik, TpmPublic Client, X509Certificate2 EkCertificate)? GetSignedDataKeys(this SignedData signedData, ILogger logger)
+    public static X509Certificate2? GetEkCertificate(this SignedData signedData, ILogger logger)
     {
-        TpmPublic? aikTpmPublicKey = null;
-        TpmPublic? clientTpmPublicKey = null;
         X509Certificate2? ekCert = null;
         var certsSet = signedData.Certificates as DerSet;
         if (certsSet is null || certsSet.Count == 0)
@@ -59,29 +58,30 @@ public static class TpmExtensions
 
         foreach (var sequence in certsSet!)
         {
-            if (((DerSequence)sequence)[0] is DerObjectIdentifier id)
+            if (((DerSequence)sequence)[0] is DerObjectIdentifier oid)
             {
-                switch (id.Id)
+                if (oid.Id == "2.23.133.8.1")
                 {
-                    case "2.23.133.8.3":
-                        aikTpmPublicKey = Marshaller.FromTpmRepresentation<TpmPublic>((((DerSequence)sequence)[1] as DerOctetString)!.GetOctets());
-                        break;
-                    case "2.23.133.8.12":
-                        clientTpmPublicKey =
-                            Marshaller.FromTpmRepresentation<TpmPublic>((((DerSequence)sequence)[1] as DerOctetString)!.GetOctets());
-                        break;
-                    case "2.23.133.8.1":
-                        var certInBytes = Marshaller.FromTpmRepresentation<byte[]>((((DerSequence)sequence)[1] as DerOctetString)!.GetOctets());
-                        ekCert = new X509Certificate2(certInBytes);
-                        break;
+                    try
+                    {
+                        var decodedCert = (((DerSequence)sequence)[1] as DerOctetString)!.GetOctets();
+                        ekCert = new X509Certificate2(decodedCert);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError("Unable to create X509Certificate2 object using decoded certificate. Error: {Error}", e.Message);
+                        return null;
+                    }
                 }
             }
         }
+
+       if (ekCert is null)
+       {
+         logger.LogError("Unable to decode ek certificate!");
+         return null;
+       }
         
-        return aikTpmPublicKey is null 
-            || clientTpmPublicKey is null 
-            || ekCert is null 
-            ? null 
-            : (aikTpmPublicKey, clientTpmPublicKey, ekCert);
+        return ekCert;
     }
 }

@@ -76,11 +76,9 @@ public sealed class KeyAttestationService : IKeyAttestationService
             _logger.LogError("Attestation statement generation failed! Details: {Message}", e.Message);
             return Pksc10GenerationResult.Empty;
         }
-
-        var clientRsaKeyPair = clientTpmKey.ToAsymmetricCipherKeyPair();
-
-        var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), clientTpmKey.Public!.GetTpmRepresentation(), aik, ekCert);
-        var csr = Pkcs10RequestGenerator.Generate(clientRsaKeyPair.Public, clientRsaKeyPair.Private, cms);
+        
+        var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), ekCert, aik);
+        var csr = Pkcs10RequestGenerator.Generate(clientTpmKey, aik, ek, cms);
 
         if (!string.IsNullOrEmpty(fileName))
         {

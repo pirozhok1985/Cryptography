@@ -1,6 +1,7 @@
+using KeyAttestation.Client.Entities;
+using KeyAttestation.Client.Extensions;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.X509;
 using SignedData = Org.BouncyCastle.Asn1.Cms.SignedData;
@@ -9,8 +10,9 @@ namespace KeyAttestation.Client.Utils;
 
 public static class Pkcs10RequestGenerator
 {
-    public static Pkcs10CertificationRequest Generate(AsymmetricKeyParameter publicKey, AsymmetricKeyParameter privateKey,  SignedData signedData)
+    public static Pkcs10CertificationRequest Generate(Tpm2Key clientKey, Tpm2Key aik, Tpm2Key ek, SignedData signedData)
     {
+        var clientRsaKeyPair = clientKey.ToAsymmetricCipherKeyPair();
         var x509Name =
             new X509Name("CN=test_user,OU=Users,OU=LinuxUser,E=test_user@lab.local,DC=lab,DC=local");
         var osVersionAttr = new DerSequence(new DerObjectIdentifier("1.3.6.1.4.1.311.13.2.3"),
@@ -27,7 +29,7 @@ public static class Pkcs10RequestGenerator
                 new DerSequence(
                     new DerInteger(01),
                     new DerBmpString("Microsoft Base Smart Card Crypto Provider"))));
-        var subjectPubInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(publicKey);
+        var subjectPubInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(clientRsaKeyPair.Public);
         var certificateExtensions = new DerSequence(
             new DerObjectIdentifier("1.2.840.113549.1.9.14"),
             new DerSet(
@@ -42,9 +44,12 @@ public static class Pkcs10RequestGenerator
         var attestationStatement = new DerSequence(
             new DerObjectIdentifier("1.3.6.1.4.1.311.21.24"),
             new DerSet(
-                new DerSequence(new DerObjectIdentifier("1.2.840.113549.1.7.2"), signedData)));
+                new DerSequence(new DerObjectIdentifier("1.2.840.113549.1.7.2"), signedData),
+                new DerSequence(new DerOctetString(ek.Public),
+                                new DerOctetString(aik.Public),
+                                new DerOctetString(clientKey.Public)))); 
         var attributes = new DerSet(osVersionAttr, clientInfo, enrollmentCsp, certificateExtensions, attestationStatement);
         var signatureAlg = "SHA1WITHRSA";
-        return new Pkcs10CertificationRequest(signatureAlg, x509Name, publicKey, attributes, privateKey);
+        return new Pkcs10CertificationRequest(signatureAlg, x509Name, clientRsaKeyPair.Public, attributes, clientRsaKeyPair.Private);
     }
 }
