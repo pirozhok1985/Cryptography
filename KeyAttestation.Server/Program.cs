@@ -8,7 +8,7 @@ builder.Services.AddScoped<IKeyAttestationService, KeyAttestationService>();
 builder.Services.AddScoped<IOtpSeedService, OtpSeedService>();
 var app = builder.Build();
 
-app.MapGrpcService<KeyAttestationServiceGrpcv1>();
+app.MapGrpcService<KeyAttestationServiceGrpc>();
 app.MapGrpcService<OtpSeedServiceGrpc>();
 
 app.Run();

@@ -39,21 +39,17 @@ public class KeyAttestationServer : IClassFixture<KeyAttestationServerFixture>
     }
     
     [Fact]
-    public void ShouldGenerateCredential_IfAttestationDataIsNotNull_And_EkPubIsCorrect()
+    public void ShouldGenerateCredential_IfAttestationDataIsNotNull()
     {
         // Arrange
         var keyAttestationService = _keyAttestationServerFixture.KeyAttestationService;
-        var ekPubCorrect = Convert.FromBase64String(EkPubCorrect);
-        var ekPubIncorrect = Convert.FromBase64String(EkPubIncorrect);
         
         // Act
-        var attestationData = keyAttestationService.GetAttestationData(ValidCsr);
-        var credentialValid = keyAttestationService.MakeCredential(attestationData!.AikTpmPublic.GetName(), ekPubCorrect);
-        var credentialInvalid = keyAttestationService.MakeCredential(attestationData!.AikTpmPublic.GetName(), ekPubIncorrect);
+        var attestationDataValid = keyAttestationService.GetAttestationData(ValidCsr);
+        var credentialValid = keyAttestationService.MakeCredential(attestationDataValid);
 
         // Assert
         Assert.NotNull(credentialValid);
-        Assert.Null(credentialInvalid);
     }
     
     [Fact]

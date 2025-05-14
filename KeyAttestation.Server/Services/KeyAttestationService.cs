@@ -36,25 +36,16 @@ public class KeyAttestationService : IKeyAttestationService
         return attestationData;
     }
 
-    public Credential? MakeCredential(byte[] aikName, byte[] ekPub)
-    {
-        TpmPublic? ekTpmPub;
-        try
-        {
-            ekTpmPub = Marshaller.FromTpmRepresentation<TpmPublic>(ekPub);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Failed to create TpmPublic! Details: {Message}", e.Message);
-            return null;
-        }
-        
+    public Credential? MakeCredential(AttestationData attestationData)
+    {   
+        var aik = attestationData.AikTpmPublic;
+        var ek = attestationData.EkTpmPublic;
         // Something that RA should take into account in order to compare with agent`s make_credential response
         var secret = Environment.MachineName.Select(Convert.ToByte).ToArray();
         
         try
         {
-            var idObject = ekTpmPub.CreateActivationCredentials(secret, aikName, out var encSecret);
+            var idObject = ek.CreateActivationCredentials(secret, aik.GetName(), out var encSecret);
             _logger.LogInformation("Encrypted credential has successfully been created! Cred: {@Cred}.", idObject);
             return new Credential(
                 idObject.encIdentity,

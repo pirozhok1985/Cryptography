@@ -35,7 +35,6 @@ public static class WorkerAttest
         var makeCredResponse = await client.MakeCredentialAsync(new ActivationRequest
         {
             Csr = result.Csr,
-            EkPub = ByteString.CopyFrom(result.Ek!.Public)
         });
         logger.LogInformation(
             "Received Activation Response! Result: {@Content}", makeCredResponse);

@@ -7,13 +7,13 @@ using KeyAttestationV1;
 
 namespace KeyAttestation.Server.Services.Grpc;
 
-public class KeyAttestationServiceGrpcv1 : KeyAttestationV1.KeyAttestationService.KeyAttestationServiceBase
+public class KeyAttestationServiceGrpc : KeyAttestationV1.KeyAttestationService.KeyAttestationServiceBase
 {
     private readonly IKeyAttestationService _keyAttestationService;
     private readonly ILogger<KeyAttestationService> _logger;
     private static ConcurrentDictionary<int, (AttestationData Data, byte[] CredentialBlob)> _attestCandidates = new();
 
-    public KeyAttestationServiceGrpcv1(IKeyAttestationService keyAttestationService, ILogger<KeyAttestationService> logger)
+    public KeyAttestationServiceGrpc(IKeyAttestationService keyAttestationService, ILogger<KeyAttestationService> logger)
     {
         _keyAttestationService = keyAttestationService;
         _logger = logger;
@@ -70,9 +70,7 @@ public class KeyAttestationServiceGrpcv1 : KeyAttestationV1.KeyAttestationServic
             return Task.FromResult(new ActivationResponse());
         }
         
-        attestData.Csr = request.Csr;
-        
-        var cred = _keyAttestationService.MakeCredential(attestData.AikTpmPublic.GetName(), request.EkPub.ToByteArray());
+        var cred = _keyAttestationService.MakeCredential(attestData);
         if (cred is null)
         {
             return Task.FromResult(new ActivationResponse());

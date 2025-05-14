@@ -1,4 +1,5 @@
 using KeyAttestation.Server.Entities;
+using Tpm2Lib;
 
 namespace KeyAttestation.Server.Abstractions;
 
@@ -17,7 +18,7 @@ public interface IKeyAttestationService
     /// <param name="aikName">Attestation identity key name</param>
     /// <param name="ekPub">Public portion of Endorsement key</param>
     /// <returns>Credential: byte[] EncryptedIdentity, byte[] IntegrityHmac, byte[] EncryptedSecret, byte[] clearSecret, byte[] integrityHmac</returns>
-    public Credential? MakeCredential(byte[] aikName, byte[] ekPub);
+    public Credential? MakeCredential(AttestationData attestationData);
 
     /// <summary>
     /// Attestation statement validation

@@ -20,7 +20,6 @@ message AttestationResponse {
 
 message ActivationRequest {
   string csr = 1;
-  bytes ek_pub = 2;
 }
 
 message ActivationResponse {
