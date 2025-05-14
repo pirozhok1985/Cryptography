@@ -117,7 +117,7 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
         switch (keyType)
         {
             case KeyType.Attestation:
-                typedAttributes = ObjectAttr.Restricted | ObjectAttr.Sign | ObjectAttr.SensitiveDataOrigin;
+                typedAttributes = ObjectAttr.Restricted | ObjectAttr.Sign;
                 keyParams = new RsaParms(new SymDefObject(), new SchemeRsassa(TpmAlgId.Sha256), 2048, 65537);
                 break;
             case KeyType.Ordinal:
@@ -127,7 +127,7 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
         }
         
         var keyAttributes = ObjectAttr.FixedTPM | ObjectAttr.FixedParent |
-                            ObjectAttr.UserWithAuth | typedAttributes;
+                            ObjectAttr.UserWithAuth | ObjectAttr.SensitiveDataOrigin | typedAttributes;
         var keyTemplate = new TpmPublic(TpmAlgId.Sha256, keyAttributes, null, keyParams, new Tpm2bPublicKeyRsa());
 
         try
