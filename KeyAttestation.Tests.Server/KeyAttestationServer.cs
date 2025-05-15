@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Tpm2Lib;
 
 namespace KeyAttestation.Tests.Server;
@@ -23,15 +24,16 @@ public class KeyAttestationServer : IClassFixture<KeyAttestationServerFixture>
 
     private const string EkPubIncorrect = "Zmxka2ZtY2xudmt3amVubGtuY2x3a2VuZGxjbmx3ZW5jbG53ZWxqa2Nud2VkbGtqbHdlZGNuZGtqbG53ZWRkY2prbmprZWRjamtlY2RlY2Rqa2V3ZGprZWRjamtlZGNqa25uandlYw==";
     
-    [Fact]
-    public void ShouldGenerateAttestationData_IfCsrIsCorrect()
+    [Theory]
+    [InlineData(ValidCsr, IncorrectCsr)]
+    public void ShouldGenerateAttestationData_IfCsrIsCorrect(string validCsr, string incorrectCsr)
     {
         // Arrange
         var keyAttestationService = _keyAttestationServerFixture.KeyAttestationService;
         
         // Act
-        var attestationDataCorrect = keyAttestationService.GetAttestationData(ValidCsr);
-        var attestationDataIncorrect = keyAttestationService.GetAttestationData(IncorrectCsr);
+        var attestationDataCorrect = keyAttestationService.GetAttestationData(validCsr);
+        var attestationDataIncorrect = keyAttestationService.GetAttestationData(incorrectCsr);
         
         // Arrange
         Assert.NotNull(attestationDataCorrect);
@@ -52,15 +54,16 @@ public class KeyAttestationServer : IClassFixture<KeyAttestationServerFixture>
         Assert.NotNull(credentialValid);
     }
     
-    [Fact]
-    public void ShouldVerifyAttestData_IfCsrIsCorrect()
+    [Theory]
+    [InlineData(ForgedCsr, ValidCsr)]
+    public void ShouldVerifyAttestData_IfCsrIsCorrect(string forgedCsr, string validCsr)
     {
         // Arrange
         var keyAttestationService = _keyAttestationServerFixture.KeyAttestationService;
         
         // Act
-        var attestationDataWithInValidCsr = keyAttestationService.GetAttestationData(ForgedCsr);
-        var attestationDataWithValidCsr = keyAttestationService.GetAttestationData(ValidCsr);
+        var attestationDataWithInValidCsr = keyAttestationService.GetAttestationData(forgedCsr);
+        var attestationDataWithValidCsr = keyAttestationService.GetAttestationData(validCsr);
         var attestResultInvalid = keyAttestationService.Attest(attestationDataWithInValidCsr!);
         var attestResultValid = keyAttestationService.Attest(attestationDataWithValidCsr!);
 
