@@ -80,7 +80,7 @@ public class KeyAttestationClient
         }
         else
         {
-            throw new PlatformNotSupportedException("Current operation system not supported!");
+            throw new PlatformNotSupportedException("Current operating system not supported!");
         }
         
         // Act
