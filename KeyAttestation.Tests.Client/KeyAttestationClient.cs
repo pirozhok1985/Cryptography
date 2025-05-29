@@ -59,6 +59,7 @@ public class KeyAttestationClient
     }
 
     [Fact]
+    [Trait(Traits.Category, Traits.PlatformDependent)]
     public void ShouldImportProvidedSeed_WithPin()
     {
         // Arrange
@@ -110,6 +111,7 @@ public class KeyAttestationClient
     }
 
     [Fact]
+    [Trait(Traits.Category, Traits.PlatformDependent)]
     public void GetPemEncodedEkCert_ShouldReturnX509Certificate()
     {
         // Arrange
