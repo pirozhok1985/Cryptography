@@ -11,7 +11,7 @@
     <ItemGroup>
       <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.1" />
       <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
-      <PackageReference Include="Microsoft.TSS" Version="2.2.0" />
+      <PackageReference Include="Microsoft.TSS" Version="2.1.1" />
       <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
       <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="22.0.11" />
     </ItemGroup>
