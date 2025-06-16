@@ -1,9 +1,7 @@
-using System.Numerics;
 using KeyAttestation.Server.Abstractions;
 using KeyAttestation.Server.Entities;
 using KeyAttestation.Server.Extensions;
 using KeyAttestation.Server.Utils;
-using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Pkcs;
 using Tpm2Lib;
 
