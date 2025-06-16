@@ -1,6 +1,7 @@
 using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Extensions;
 using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.X509;
@@ -44,10 +45,18 @@ public static class Pkcs10RequestGenerator
         var attestationStatement = new DerSequence(
             new DerObjectIdentifier("1.3.6.1.4.1.311.21.24"),
             new DerSet(
-                new DerSequence(new DerObjectIdentifier("1.2.840.113549.1.7.2"), signedData),
-                new DerSequence(new DerOctetString(ek.Public),
-                                new DerOctetString(aik.Public),
-                                new DerOctetString(clientKey.Public)))); 
+                new DerSequence(
+                    new ContentInfo(new DerObjectIdentifier("1.2.840.113549.1.7.2"), signedData),
+                    new DerSequence(
+                        new SubjectPublicKeyInfo(
+                            new AlgorithmIdentifier(PkcsObjectIdentifiers.RsaEncryption),
+                            new DerBitString(ek.Public)),
+                        new SubjectPublicKeyInfo(
+                            new AlgorithmIdentifier(PkcsObjectIdentifiers.RsaEncryption),
+                            new DerBitString(aik.Public)),
+                        new SubjectPublicKeyInfo(
+                            new AlgorithmIdentifier(PkcsObjectIdentifiers.RsaEncryption),
+                            new DerBitString(clientKey.Public)))))); 
         var attributes = new DerSet(osVersionAttr, clientInfo, enrollmentCsp, certificateExtensions, attestationStatement);
         var signatureAlg = "SHA1WITHRSA";
         return new Pkcs10CertificationRequest(signatureAlg, x509Name, clientRsaKeyPair.Public, attributes, clientRsaKeyPair.Private);

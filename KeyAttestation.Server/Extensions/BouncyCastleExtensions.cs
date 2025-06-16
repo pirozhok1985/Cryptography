@@ -1,7 +1,10 @@
 using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.Cms;
+using Org.BouncyCastle.Asn1.Pkcs;
+using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Pkcs;
 using Tpm2Lib;
+using ContentInfo = Org.BouncyCastle.Asn1.Cms.ContentInfo;
+using SignedData = Org.BouncyCastle.Asn1.Cms.SignedData;
 
 namespace KeyAttestation.Server.Extensions;
 
@@ -31,11 +34,14 @@ public static class BouncyCastleExtensions
         {
             foreach (var attribute in attestationStatement)
             {
-                if (attribute is DerSequence sequence && sequence[0] is DerObjectIdentifier oid && oid.Id == "1.2.840.113549.1.7.2")
+                if (attribute is DerSequence sequence)
                 {
-                    signedData = sequence[1];
+                    var contentInfo = ContentInfo.GetInstance((DerSequence)sequence[0]);
+                    signedData = contentInfo.Content;
                     break;
                 }
+
+                return null;
             }
 
             return SignedData.GetInstance(signedData);
@@ -51,16 +57,25 @@ public static class BouncyCastleExtensions
     {
         try
         {
-            var keys = (DerSequence)attestationStatement.First(attribute => attribute is DerSequence sequence
-                && sequence[0] is DerOctetString);
-            var ek = Marshaller.FromTpmRepresentation<TpmPublic>(((DerOctetString)keys[0]).GetOctets());
-            var aik = Marshaller.FromTpmRepresentation<TpmPublic>(((DerOctetString)keys[1]).GetOctets());
-            var client = Marshaller.FromTpmRepresentation<TpmPublic>(((DerOctetString)keys[2]).GetOctets());
+            var keySequence = (DerSequence)(attestationStatement[0] as DerSequence)![1];
+            if (keySequence.Count < 3)
+            {
+                logger.LogError("Three keys are expected in the attestation statement, but found {Count} keys!", keySequence.Count);
+                return null;
+            }
+
+            var ekSubPubInfo = SubjectPublicKeyInfo.GetInstance(keySequence[0]);
+            var aikSubPubInfo = SubjectPublicKeyInfo.GetInstance(keySequence[1]);
+            var clientSubPubInfo = SubjectPublicKeyInfo.GetInstance(keySequence[2]);
+            
+            var ek = Marshaller.FromTpmRepresentation<TpmPublic>(ekSubPubInfo.PublicKey.GetOctets());
+            var aik = Marshaller.FromTpmRepresentation<TpmPublic>(aikSubPubInfo.PublicKey.GetOctets());
+            var client = Marshaller.FromTpmRepresentation<TpmPublic>(clientSubPubInfo.PublicKey.GetOctets());
             return (ek, aik, client);
         }
         catch (Exception e)
         {
-            logger.LogError("Failed to retrieve signed information from Pkcs10CertificationRequest! Details: {Message}", e.Message);
+            logger.LogError("Failed to retrieve keys from Pkcs10CertificationRequest! Details: {Message}", e.Message);
             return null;
         }
     }
