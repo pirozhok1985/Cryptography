@@ -1,7 +1,10 @@
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Pkcs;
 using Tpm2Lib;
 
@@ -17,7 +20,15 @@ public static class TpmExtensions
         return RSA.Create(rsaParams);
     }
 
-        public static Attest? GetAttestData(this SignedData signedData, ILogger logger)
+    public static AsymmetricKeyParameter ToAsymmetricKeyParameter(this TpmPublic keyPublic)
+    {
+        var parameters = keyPublic.parameters as RsaParms;
+        var e = new BigInteger(parameters?.exponent == 0U ? RsaParms.DefaultExponent : BitConverter.GetBytes(parameters!.exponent)).ToBigIntegerBc();
+        var n = RawRsa.FromBigEndian((keyPublic.unique as Tpm2bPublicKeyRsa)!.buffer).ToBigIntegerBc();
+        return new RsaKeyParameters(false, n, e);
+    }
+
+    public static Attest? GetAttestData(this SignedData signedData, ILogger logger)
     {
         try
         {

@@ -1,4 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
+using Org.BouncyCastle.Pkcs;
 using Tpm2Lib;
 
 namespace KeyAttestation.Server.Entities;
@@ -17,9 +18,9 @@ public class AttestationData
 
     public X509Certificate2 EKCertificate { get; init; }
     
-    public string? Csr { get; set; }
+    public Pkcs10CertificationRequest Csr { get; set; }
 
-    public AttestationData(Attest? attestation, byte[] signature, TpmPublic? ekTpmPublic, TpmPublic? aikTpmPublic, TpmPublic? clientTpmPublic, X509Certificate2 ekCert)
+    public AttestationData(Attest? attestation, byte[] signature, TpmPublic? ekTpmPublic, TpmPublic? aikTpmPublic, TpmPublic? clientTpmPublic, X509Certificate2 ekCert, Pkcs10CertificationRequest request)
     {
         Attestation = attestation ?? throw new ArgumentNullException(nameof(attestation));
         Signature = signature;
@@ -27,6 +28,7 @@ public class AttestationData
         AikTpmPublic = aikTpmPublic ?? throw new ArgumentNullException(nameof(aikTpmPublic));
         ClientTpmPublic = clientTpmPublic ?? throw new ArgumentNullException(nameof(clientTpmPublic));
         EKCertificate = ekCert ?? throw new ArgumentNullException(nameof(ekCert));
+        Csr = request ?? throw new ArgumentNullException(nameof(request));
     }
 
     public override string ToString()

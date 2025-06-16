@@ -1,7 +1,9 @@
+using System.Numerics;
 using KeyAttestation.Server.Abstractions;
 using KeyAttestation.Server.Entities;
 using KeyAttestation.Server.Extensions;
 using KeyAttestation.Server.Utils;
+using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Pkcs;
 using Tpm2Lib;
 
@@ -135,6 +137,14 @@ public class KeyAttestationService : IKeyAttestationService
             logger.LogError("VerifyCertify failed! Signature is incorrect!");
             return false;
         }
+        
+        var clientKeyFromCsr = data.Csr.GetPublicKey();
+        var clientKeyFromAttest = data.ClientTpmPublic.ToAsymmetricKeyParameter();
+        if (!clientKeyFromCsr.Equals(clientKeyFromAttest))
+        {
+            logger.LogError("VerifyCertify failed! Client key from CSR does not match with attested key!");
+            return false;
+        }
 
         return true;
     }
@@ -183,6 +193,6 @@ public class KeyAttestationService : IKeyAttestationService
         }
         logger.LogInformation("Successfully retrieved aik and client keys from Signed data: Ek:{@Ek} Aik:{@Aik}, ClientKey:{@Client}", keys.Value.ek, keys.Value.aik, keys.Value.client);
 
-        return new AttestationData(attest, signature, keys.Value.ek, keys.Value.aik, keys.Value.client, ekCert);
+        return new AttestationData(attest, signature, keys.Value.ek, keys.Value.aik, keys.Value.client, ekCert, request);
     }
 }
