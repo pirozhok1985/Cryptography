@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using Google.Protobuf;
 using KeyAttestation.Client.Factories;
 using KeyAttestation.Client.Services;
-using KeyAttestation.Client.Utils;
 using Microsoft.Extensions.Logging;
 using OtpSeedV1;
 using Tpm2Lib;
@@ -19,7 +18,8 @@ public static class WorkerOtp
         var loggerSeed = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<SeedTpmService>();
         using var factory = new GrpcClientFactoryCustom<OtpSeedService.OtpSeedServiceClient>(endPoint);
         var client = factory.CreateClient(channel => new OtpSeedService.OtpSeedServiceClient(channel));
-        using var tpmFacade = Helper.CreateTpm2Facade(tpmDevice, loggerAttest);
+        var tpmFacadeFactory = new Tpm2FacadeFactory();
+        using var tpmFacade = tpmFacadeFactory.CreateTpm2Facade(tpmDevice, loggerAttest);
         var keyAttestationService = new KeyAttestationService(fileSystem, loggerAttest);
         var seedTpmService = new SeedTpmService(loggerSeed);
 

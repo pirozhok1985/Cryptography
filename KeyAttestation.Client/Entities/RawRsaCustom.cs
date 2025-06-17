@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using System.Numerics;
-using KeyAttestation.Client.Utils;
 using Tpm2Lib;
 
 namespace KeyAttestation.Client.Entities;

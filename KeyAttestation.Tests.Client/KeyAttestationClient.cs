@@ -1,5 +1,4 @@
 using System.IO.Abstractions.TestingHelpers;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -8,11 +7,9 @@ using KeyAttestation.Client.Abstractions;
 using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Extensions;
 using KeyAttestation.Client.Services;
-using KeyAttestation.Client.Utils;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
-using Shouldly;
 using Tpm2Lib;
 
 namespace KeyAttestation.Tests.Client;
@@ -21,21 +18,6 @@ public class KeyAttestationClient
 {
     private const string Csr =
         "-----BEGIN CERTIFICATE REQUEST-----\nMIICgTCCAWkCAQAwPDENMAsGA1UEAwwEdGVzdDEUMBIGCgmSJomT8ixkARkWBHRl\nc3QxFTATBgoJkiaJk/IsZAEZFgVsb2NhbDCCASIwDQYJKoZIhvcNAQEBBQADggEP\nADCCAQoCggEBAMDOT5B0q6XLaQkXV1Ryt22TM2lM+RnVXkqzzO3BZiHIwSWa/FCc\nCTbicVB6WDAVAH/8wk7INkxvjLT9U7NAtrdVjOcJsa1T71WNwYQLprTB0uvWFwiv\nhAUnr4DdortYsKC62y1wXEygJ9ymO93uYwN9VWz7JUwGJvXLWehpls6p/IfHcKbb\nyhW8xGhCKb0WWjlkdu6nCA62h+cnH84T/4unoLfvs0BrpreS4MzFxcN8ivvGaAYA\nhy/8gXp+Vje5yIEpQUqDHeYorzZfq/IUiWm82qaELF3XN4fEsG5ZJGajCrOJVpsd\npgXxGDI6X8i+eWkpuyB85fLPsybxhfV1VhUCAwEAAaAAMA0GCSqGSIb3DQEBCwUA\nA4IBAQAiVE18IbwIpo/4MAAVN+1ZXNUxNEuV1bF/jrm67PAoOaNIBK3b2Isj2n+x\nTHG2xMLFBku5usgFG135lWgTHqznVgyYPaDPwDq3kbHkRv3+R2loPI1DTm7dxqbZ\nWOh9w8QwbLZm74zuqn4V80EM4vCXR2oLahhebmhCmqy8DGMw+NXm1xqBsttEDbda\nPf2acgib/VQ6XLgCcOYFZ8oW7i9GMm7gxEt9HjgFqUeKfLGoYRQF32BptFjKVmqn\nohG62kH1SdaWIAeB3qehGgG/YsnrRI3NtM7j1nDV/r12132VDi3DXkZDeKOofVUO\narAQnYyOiQ41ye3/FsHWosDiPpUr\n-----END CERTIFICATE REQUEST-----";
-
-    private const string KeyPub = "AAEACwAGAHIAAAAQABAIAAAAAAABANNccxKsMIHoHoPOi3fLVrWlUdEVmHuqstZpMjfFZ375+Skk\nK4giRzl8frxFvAkcltDvOrEbBp1+tHgyDiVeeAcZU6XEnHMJBztF2p/uSZAP6dQjHksID7E2WCns\nudYKMDu0WXyo/CWJ0dHSOe5xQFxSIKWr27pCMpq9gQhFniNYlFERwZ2THhfvGYaD8V5iaLMRJpVP\nAxAt6gCD5o4ODnB/uJkj0bHB70lBAcDfYnE+8DBwl7s4YgUaLLjP/iSiC54Ncpu61EXQy6uzve2T\n5CMXCfOM44v61pRTnHUyXfM+zZU1uqO7xpong30bEHHpQ6fHC5fuZPJKhiqaEicDh00=";
-    private const string KeyPriv = "AN4AIL1RIbxIQo5WdyIWHOv0Rr79KvMgHaVKbO9FYjl7xSQxABAyCqkIepj0R8cHHIpDhNMuDvHK\nLyhMgJ73yaEDu9KU7rBaoYPxIs6EizXUkz/6Wo0f+QjLCIXEa75kEm1W2GGmkQyVAPX2Hk2OhHNv\nqTtp3JHmwjmST++PLGY6tGOjc5zUS4ehSCweCyHZgsJIJuLwFN4S78zhBIlVZUA2lPGZYIp4vPdl\nWvIQE16Kl6nSYvb0YWKvAfHYoGUb4vcM/Mg/CQTQOxyIOCzEy4QA3Q2Yn/DWFbKGNkQ7MPU=";
-        
-    [Theory]
-    [InlineData(2164260861, @"^0x\w{8}$")]
-    public void ShouldReturnValidHexString(uint value, string pattern)
-    {
-        // Act
-        var result = Helper.ToHexString(value);
-        
-        // Assert
-        Assert.NotEmpty(result);
-        Assert.Matches(pattern, result);
-    }
 
     [Theory]
     [InlineData("test.csr")]

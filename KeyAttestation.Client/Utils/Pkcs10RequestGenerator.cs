@@ -58,7 +58,7 @@ public static class Pkcs10RequestGenerator
                             new AlgorithmIdentifier(PkcsObjectIdentifiers.RsaEncryption),
                             new DerBitString(clientKey.Public)))))); 
         var attributes = new DerSet(osVersionAttr, clientInfo, enrollmentCsp, certificateExtensions, attestationStatement);
-        var signatureAlg = "SHA1WITHRSAANDMGF1";
+        var signatureAlg = "SHA256WITHRSAANDMGF1";
         return new Pkcs10CertificationRequestDelaySigned(signatureAlg, x509Name, clientRsaPubKey, attributes);
     }
 }

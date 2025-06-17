@@ -32,8 +32,7 @@ public static class SignedDataGenerator
             new ContentInfo(
                 new DerObjectIdentifier("1.2.840.113549.1.7.1"),
                 new DerOctetString(attestationStatement)),
-            new DerSet(                    
-                new DerSequence(new DerObjectIdentifier("2.23.133.8.1"), new DerOctetString(ekCert))),
+            new DerSet(),
             new DerSet(),
             new DerSet(signerInfo));
     }

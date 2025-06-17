@@ -1,4 +1,3 @@
-using System.Security.Cryptography.X509Certificates;
 using KeyAttestation.Client.Abstractions;
 using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Factories;
@@ -7,7 +6,7 @@ using Tpm2Lib;
 
 namespace KeyAttestation.Client;
 
-public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
+public sealed class Tpm2Facade<TTpm2Device> : ITpm2Facade
 {
     private readonly ILogger _logger;
     private readonly Tpm2DeviceCreationProperties _properties;
@@ -17,7 +16,7 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
         Attestation,
         Ordinal
     }
-    
+
     public Tpm2? Tpm { get; init; }
     private Tpm2Device? _tpmDevice;
     private bool _disposed;
@@ -47,14 +46,22 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
         }
     }
 
-    
+
     public byte[] GetEkCert()
     {
         var ekCertIndex = TpmHandle.NV(0xc00002);
-        var ekCertPub = Tpm!.NvReadPublic(ekCertIndex, out var _);
-        return Tpm.NvRead(TpmRh.Owner, ekCertPub.nvIndex, ekCertPub.dataSize, 0);
-    } 
-    
+        try
+        {
+            var ekCertPub = Tpm!.NvReadPublic(ekCertIndex, out var _);
+            return Tpm.NvRead(TpmRh.Owner, ekCertPub.nvIndex, ekCertPub.dataSize, 0);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("GetEkCert error! Details: {Message}", e.Message);
+            return [];
+        }
+    }
+
     public Tpm2Key? CreateEk()
     {
         var ekAttributes = ObjectAttr.Restricted | ObjectAttr.Decrypt | ObjectAttr.FixedTPM | ObjectAttr.FixedParent |
@@ -64,7 +71,7 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
         try
         {
             var ekHandle = Tpm!.CreatePrimary(
-                TpmHandle.RhEndorsement, 
+                TpmHandle.RhEndorsement,
                 new SensitiveCreate(),
                 endorsementKeyTemplate,
                 null,
@@ -106,7 +113,7 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
 
     public Tpm2Key? CreateAk(TpmHandle parent)
         => CreateRsaKey(KeyType.Attestation, parent);
-    
+
     public Tpm2Key? CreateKey(TpmHandle parent)
         => CreateRsaKey(KeyType.Ordinal, parent);
 
@@ -125,7 +132,7 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
                 keyParams = new RsaParms(new SymDefObject(), null, 2048, 65537);
                 break;
         }
-        
+
         var keyAttributes = ObjectAttr.FixedTPM | ObjectAttr.FixedParent |
                             ObjectAttr.UserWithAuth | ObjectAttr.SensitiveDataOrigin | typedAttributes;
         var keyTemplate = new TpmPublic(TpmAlgId.Sha256, keyAttributes, null, keyParams, new Tpm2bPublicKeyRsa());
@@ -151,7 +158,7 @@ public sealed class Tpm2Facade<TTpm2Device>: ITpm2Facade
             return null;
         }
     }
-    
+
     public void Dispose()
     {
         if (_disposed)

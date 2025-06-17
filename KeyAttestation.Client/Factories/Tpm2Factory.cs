@@ -1,5 +1,6 @@
 ﻿using KeyAttestation.Client.Abstractions;
 using KeyAttestation.Client.Entities;
+using Microsoft.Extensions.Logging;
 using Tpm2Lib;
 
 namespace KeyAttestation.Client.Factories;

@@ -17,7 +17,8 @@ public static class WorkerAttest
         var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<KeyAttestationService>();
         using var factory = new GrpcClientFactoryCustom<KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient>(endPoint);
         var client = factory.CreateClient(channel => new KeyAttestationV1.KeyAttestationService.KeyAttestationServiceClient(channel));
-        using var tpmFacade = Helper.CreateTpm2Facade(tpmDevice, logger);
+        var tpmFacadeFactory = new Tpm2FacadeFactory();
+        using var tpmFacade = tpmFacadeFactory.CreateTpm2Facade(tpmDevice, logger);
 
         var keyAttestationService = new KeyAttestationService(fileSystem, logger);
 
