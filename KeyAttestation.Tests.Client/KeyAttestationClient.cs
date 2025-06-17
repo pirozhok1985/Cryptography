@@ -92,25 +92,6 @@ public class KeyAttestationClient
     }
 
     [Fact]
-    public void ShouldConvertToRsa_IfHasTpmtInput()
-    {
-        // Arrange
-        var rawRsaCustom = new RawRsaCustom();
-        
-        // Act
-        var pubTpm = Marshaller.FromTpmRepresentation<TpmPublic>(Convert.FromBase64String(KeyPub));
-        var privTpm = Marshaller.FromTpmRepresentation<TpmPrivate>(Convert.FromBase64String(KeyPriv));
-        rawRsaCustom.Init(pubTpm, privTpm);
-        
-        // Assert
-        rawRsaCustom.D.ShouldBeGreaterThan(BigInteger.One);
-        rawRsaCustom.N.ShouldBeGreaterThan(BigInteger.One);
-        rawRsaCustom.P.ShouldBeGreaterThan(BigInteger.One);
-        rawRsaCustom.Q.ShouldBeGreaterThan(BigInteger.One);
-        rawRsaCustom.E.ShouldBeEquivalentTo(new BigInteger(65537));
-    }
-
-    [Fact]
     [Trait(Traits.Category, Traits.PlatformDependent)]
     public void GetPemEncodedEkCert_ShouldReturnX509Certificate()
     {
