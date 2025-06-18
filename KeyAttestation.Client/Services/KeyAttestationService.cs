@@ -23,24 +23,24 @@ public sealed class KeyAttestationService : IKeyAttestationService
         _logger = logger;
     }
     
-    public async Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(ITpm2Facade tpm2Facade, string? fileName = null)
+    public async Task<Pkcs10GenerationResult> GeneratePkcs10CertificationRequest(ITpm2Facade tpm2Facade, string? fileName = null)
     {
         var ekCert = tpm2Facade.GetEkCert();
         if (ekCert.Length == 0)
         {
-            return Pksc10GenerationResult.Empty;
+            return Pkcs10GenerationResult.Empty;
         }
 
         var ek = tpm2Facade.CreateEk();
         if (ek == null)
         {
-            return Pksc10GenerationResult.Empty;
+            return Pkcs10GenerationResult.Empty;
         }
 
         var aik = tpm2Facade.CreateAk(ek.Handle!);
         if (aik == null)
         {
-            return Pksc10GenerationResult.Empty;
+            return Pkcs10GenerationResult.Empty;
         }
 
         // Parent key persistent handle
@@ -57,7 +57,7 @@ public sealed class KeyAttestationService : IKeyAttestationService
         var clientTpmKey = tpm2Facade.CreateKey(srkHandle);
         if (clientTpmKey == null)
         {
-            return Pksc10GenerationResult.Empty;
+            return Pkcs10GenerationResult.Empty;
         }
 
         Attest? attestation;
@@ -74,7 +74,7 @@ public sealed class KeyAttestationService : IKeyAttestationService
         catch (Exception e)
         {
             _logger.LogError("Attestation statement generation failed! Details: {Message}", e.Message);
-            return Pksc10GenerationResult.Empty;
+            return Pkcs10GenerationResult.Empty;
         }
         
         var cms = SignedDataGenerator.GenerateCms(Marshaller.GetTpmRepresentation(signature), attestation.GetTpmRepresentation(), ekCert, aik);
@@ -88,7 +88,7 @@ public sealed class KeyAttestationService : IKeyAttestationService
             await csr.WriteCsrAsync(fileName, _fileSystem.File);
         }
 
-        return new Pksc10GenerationResult
+        return new Pkcs10GenerationResult
         {
             Csr = await csr.ConvertPkcs10RequestToPem(),
             Ek = ek,

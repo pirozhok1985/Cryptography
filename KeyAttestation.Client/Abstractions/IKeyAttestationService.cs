@@ -12,7 +12,7 @@ public interface IKeyAttestationService
     /// <param name="tpm2Facade">Tpm2 device interface facade</param>>
     /// <param name="fileName">The name of the file to be saved</param>
     /// <returns>Pkcs10GenerationResult:string? Csr, TpmKey? Ek, TpmKey? Aik</returns>
-    public Task<Pksc10GenerationResult> GeneratePkcs10CertificationRequest(ITpm2Facade tpm2Facade, string? fileName);
+    public Task<Pkcs10GenerationResult> GeneratePkcs10CertificationRequest(ITpm2Facade tpm2Facade, string? fileName);
     
     /// <summary>
     /// Credential activation interface
