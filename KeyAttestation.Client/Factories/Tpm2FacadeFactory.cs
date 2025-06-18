@@ -5,9 +5,9 @@ using Tpm2Lib;
 
 namespace KeyAttestation.Client.Factories;
 
-public class Tpm2FacadeFactory : ITpm2FacadeFactory
+public static class Tpm2FacadeFactory
 {
-        public ITpm2Facade CreateTpm2Facade(string deviceName, ILogger logger)
+        public static ITpm2Facade CreateTpm2Facade(string deviceName, ILogger logger)
         => deviceName switch
         {
             "simulator" => new Tpm2Facade<TcpTpmDevice>(logger, new Tpm2DeviceCreationProperties()

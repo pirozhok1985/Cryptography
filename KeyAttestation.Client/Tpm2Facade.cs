@@ -32,8 +32,7 @@ public sealed class Tpm2Facade<TTpm2Device> : ITpm2Facade
 
     private Tpm2? InitialiseTpm()
     {
-        var factory = new Tpm2DeviceFactory<TTpm2Device>();
-        _tpmDevice = factory.CreateTpm2Device(_properties);
+        _tpmDevice = Tpm2DeviceFactory<TTpm2Device>.CreateTpm2Device(_properties);
         try
         {
             _tpmDevice?.Connect();

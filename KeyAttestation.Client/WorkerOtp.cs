@@ -18,8 +18,7 @@ public static class WorkerOtp
         var loggerSeed = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<SeedTpmService>();
         using var factory = new GrpcClientFactoryCustom<OtpSeedService.OtpSeedServiceClient>(endPoint);
         var client = factory.CreateClient(channel => new OtpSeedService.OtpSeedServiceClient(channel));
-        var tpmFacadeFactory = new Tpm2FacadeFactory();
-        using var tpmFacade = tpmFacadeFactory.CreateTpm2Facade(tpmDevice, loggerAttest);
+        using var tpmFacade = Tpm2FacadeFactory.CreateTpm2Facade(tpmDevice, loggerAttest);
         var keyAttestationService = new KeyAttestationService(fileSystem, loggerAttest);
         var seedTpmService = new SeedTpmService(loggerSeed);
 

@@ -5,9 +5,9 @@ using Tpm2Lib;
 
 namespace KeyAttestation.Client.Factories;
 
-public class Tpm2DeviceFactory<TTpm2Device> : ITpm2DeviceFactory
+public static class Tpm2DeviceFactory<TTpm2Device>
 {
-    public Tpm2Device? CreateTpm2Device(Tpm2DeviceCreationProperties properties)
+    public static Tpm2Device? CreateTpm2Device(Tpm2DeviceCreationProperties properties)
     {
         if (typeof(TTpm2Device) == typeof(LinuxTpmDevice))
         {
