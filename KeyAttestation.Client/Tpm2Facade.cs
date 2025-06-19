@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Reflection.Metadata;
 using KeyAttestation.Client.Abstractions;
 using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Factories;
@@ -48,9 +50,10 @@ public sealed class Tpm2Facade<TTpm2Device> : ITpm2Facade
 
     public byte[] GetEkCert()
     {
-        var ekCertIndex = TpmHandle.NV(0xc00002);
         try
         {
+            var ekCertIndex = FindEkCertHandle((uint)TpmConstants.EkNvIndex.RsaEkCertNvIndex);
+            ArgumentNullException.ThrowIfNull(ekCertIndex);
             var ekCertPub = Tpm!.NvReadPublic(ekCertIndex, out var _);
             return Tpm.NvRead(TpmRh.Owner, ekCertPub.nvIndex, ekCertPub.dataSize, 0);
         }
@@ -154,6 +157,20 @@ public sealed class Tpm2Facade<TTpm2Device> : ITpm2Facade
         catch (Exception e)
         {
             _logger.LogError("Failed to create asymmetric key! Details: {Message}", e.Message);
+            return null;
+        }
+    }
+
+    private TpmHandle? FindEkCertHandle(uint index)
+    {
+        try
+        {
+            _ = Tpm!.GetCapability(Cap.Handles, TpmConstants.StartNvIndex, TpmConstants.EndNvIndex, out var indexes);
+            return ((HandleArray)indexes).handle.First(x => x.handle == index);
+        }
+        catch (InvalidOperationException e)
+        {
+            _logger.LogError("Ek certificate handle not found! Details: {Message}", e.Message);
             return null;
         }
     }

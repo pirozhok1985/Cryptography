@@ -3,7 +3,6 @@ using Google.Protobuf;
 using KeyAttestation.Client.Abstractions;
 using KeyAttestation.Client.Entities;
 using KeyAttestation.Client.Factories;
-using KeyAttestation.Client.Utils;
 using KeyAttestationV1;
 using Microsoft.Extensions.Logging;
 using Tpm2Lib;
@@ -23,7 +22,7 @@ public static class WorkerAttest
         var pkcs10GenResult = await CreatePkcs10RequestWithAttestation(keyAttestationService, tpmFacade, csrFilePath, logger);
 
         var activatedCred = await ActivateCredential(keyAttestationService, tpmFacade, client, pkcs10GenResult, logger);
-
+        
         var attestationResult = await Attestate(activatedCred, client, logger);
     }
 
